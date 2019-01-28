@@ -1,26 +1,33 @@
 <?php
 
 namespace shgysk8zer0;
+use \PDO;
+use \shgysk8zer0\Traits\{PDOParamTypes};
 
 final class PDOStatement extends \PDOStatement
 {
-	final public function __set(string $param, $value): void
+	use PDOParamTypes;
+
+	final public function __toString(): string
 	{
-		$this->bindValue(":{$param}", $value);
+		return $this->queryString;
 	}
 
-	final public function __invoke(array $params = null): bool
+	final public function __set(string $param, $value): void
 	{
-		if (isset($params)) {
-			$keys = array_keys($params);
-			$values = array_values($params);
-			array_walk($keys, function(string $key): string
-			{
-				return sprintf(':%s', $key);
-			});
-			return $this->execute(array_combine($keys, $values));
+		$this->bindValue(":{$param}", $value, static::getParamType($value));
+	}
+
+	final public function __invoke(array $input_params = null): \Generator
+	{
+		if (isset($input_params)) {
+			$this->execute($input_params);
 		} else {
-			return $this->execute();
+			$this->execute();
+		}
+
+		while($result = $this->fetch()) {
+			yield $result;
 		}
 	}
 }

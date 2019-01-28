@@ -1,9 +1,11 @@
 <?php
 
 namespace shgysk8zer0;
+use \shgysk8zer0\Traits\{PDOParamTypes};
 
 class PDO extends \PDO
 {
+	use PDOParamTypes;
 	const OPTIONS = [
 		self::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
 		self::ATTR_ERRMODE            => self::ERRMODE_EXCEPTION,
@@ -28,10 +30,16 @@ class PDO extends \PDO
 		parent::__construct($dsn, $username, $password, self::OPTIONS);
 	}
 
-	public function __invoke(string $sql, array $params = null): array
+	public function __invoke(string ...$queries): \Generator
 	{
-		$stm = $this->prepare($sql);
-		$stm($params);
-		return $stm->fetchAll();
+		$this->beginTransaction();
+		try {
+			foreach ($queries as $query) {
+				yield $this->exec($query);
+			}
+			$this->commit();
+		} catch (\Throwable $e) {
+			$this->rollBack();
+		}
 	}
 }

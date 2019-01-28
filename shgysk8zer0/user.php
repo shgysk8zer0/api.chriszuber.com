@@ -50,9 +50,16 @@ final class User implements \JsonSerializable
 		}
 	}
 
-	final public function __debug_info(): array
+	final public function __debugInfo(): array
 	{
-		return $this->_data;
+		return [
+			'id'       => $this->_id,
+			'username' => $this->_username,
+			'created'  => $this->_created,
+			'updated'  => $this->_updated,
+			'loggedIn' => $this->_loggedIn,
+			'hash'     => $this->_hash,
+		];
 	}
 
 	public function __toString(): string
@@ -214,5 +221,28 @@ final class User implements \JsonSerializable
 		} else {
 			return false;
 		}
+	}
+
+	static public function getUser(PDO $pdo, Int $id): self
+	{
+		$user = new self($pdo);
+		$stm = $pdo->prepare(
+			'SELECT `id`, `username`, `password` AS `hash`, `created`, `updated`
+			FROM `users`
+			WHERE `id` = :id
+			LIMIT 1;'
+		);
+		$stm->bindValue(':id', $id);
+
+		if ($stm->execute()) {
+			$data = $stm->fetchObject();
+			$user->_id = intval($data->id);
+			$user->_username = $data->username;
+			$user->_created = new DateTime($data->created);
+			$user->_updated = new DateTime($data->updated);
+			$user->_hash = $data->hash;
+			$user->_loggedIn = true;
+		}
+		return $user;
 	}
 }
