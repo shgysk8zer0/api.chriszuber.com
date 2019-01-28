@@ -1,0 +1,22 @@
+{
+	"name": "ledger-api",
+	"version": "1.0.0",
+	"author": "Chris Zuber <shgysk8zer0@gmail.com>",
+	"license": "MIT",
+	"description": "A ledger API written in PHP & MySQL",
+	"keywords": [
+		"PHP",
+		"MySQL",
+		"ledger",
+		"API"
+	],
+	"config": {
+		"host": "localhost",
+		"port": 8000
+	},
+	"private": true,
+	"scripts": {
+		"preinstall": "git submodule update --init --recursive",
+		"start": "php -S ${npm_package_config_host}:${npm_package_config_port}"
+	}
+}
