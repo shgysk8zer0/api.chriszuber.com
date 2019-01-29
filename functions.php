@@ -1,39 +1,44 @@
 <?php
 
 namespace Functions;
-use const \Consts\{DEBUG, CREDS_FILE, HMAC_FILE};
-use \shgysk8zer0\{PDO, User, JSONFILE};
+
+use const \Consts\{DEBUG, ERROR_LOG};
+use \shgysk8zer0\{PDO, User, JSONFILE, Headers, HTTPException};
 use \StdClass;
+use \DateTime;
 use \Throwable;
+use \ErrorException;
 
-function log_exception(Throwable $e)
+function error_handler(int $errno, string $errstr, string $errfile, int $errline = 0): bool
 {
-	file_put_contents('error.log', sprintf(
-		'Error: "%s" @ %s:%d',
-		$e->getMessage(),
-		$e->getFile(),
-		$e->getLine()
-	) . PHP_EOL);
+	throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+	return true;
 }
 
-function get_pdo(string $filename = CREDS_FILE): PDO
+function exception_handler(Throwable $e)
 {
-	static $instances = [];
-	if (! in_array($filename, $instances)) {
-		$creds = new JSONFile($filename);
-		$instances[$filename] = new PDO($creds->username, $creds->password, $creds->database);
-	}
-	return $instances[$filename];
-}
-
-function get_user(string $creds_file = CREDS_FILE, string $hmac_file = HMAC_FILE): User
-{
-	$pdo = get_pdo($creds_file);
-	if (array_key_exists('token', $_REQUEST)) {
-		$token  = $_REQUEST['token'];
-		User::setKey(file_get_contents($hmac_file));
-		return User::loadFromToken(get_pdo($creds_file), $_REQUEST['token']);
+	if ($e instanceof HTTPException) {
+		$e();
 	} else {
-		return new User($pdo);
+		Headers::status(Headers::INTERNAL_SERVER_ERROR);
+		Headers::set('Content-Type', 'application/json');
+		$dtime = new DateTime();
+
+		file_put_contents(ERROR_LOG, sprintf(
+			'[%s %d]: %s "%s" on %s:%d' . PHP_EOL,
+			get_class($e),
+			$e instanceof ErrorException ? $e->getSeverity() : $e->getCode(),
+			$dtime->format(DateTime::W3C),
+			$e->getMessage(),
+			$e->getFile(),
+			$e->getLine()
+		), FILE_APPEND | LOCK_EX);
+
+		exit(json_encode([
+			'error' => [
+				'message' => 'Internal Server Error',
+				'status'  => Headers::INTERNAL_SERVER_ERROR,
+			],
+		]));
 	}
 }
