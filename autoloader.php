@@ -31,7 +31,10 @@ try {
 	}
 
 	User::setKey(file_get_contents(HMAC_FILE));
-	PDO::setCredsFile(CREDS_FILE);
+
+	if (FILE_EXISTS(CREDS_FILE)) {
+		PDO::setCredsFile(CREDS_FILE);
+	}
 } catch (\Throwable $e) {
 	print_r($e);
 }

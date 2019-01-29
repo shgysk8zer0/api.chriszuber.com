@@ -23,15 +23,21 @@ class PDO extends \PDO
 		string $password,
 		string $database = null,
 		string $host     = 'localhost',
-		int    $port     = 3306,
-		string $charset  = 'UTF8'
+		string $charset  = 'UTF8',
+		int    $port     = 3306
 	)
 	{
 		if (is_null($database)) {
 			$database = $username;
 		}
+		$dsn = new DSN();
+		$dsn->setHost($host);
+		$dsn->setCharset($charset);
+		$dsn->setPort($port);
 
-		$dsn = sprintf('mysql:dbname=%s;host=%s;charset=%s;port=%d', $database, $host, $charset, $port);
+		if (isset($database)) {
+			$dsn->setDatabase($database);
+		}
 		parent::__construct($dsn, $username, $password, self::OPTIONS);
 	}
 
@@ -64,7 +70,10 @@ class PDO extends \PDO
 			static::$_instances[$creds_file] = new self(
 				$data->username,
 				$data->password,
-				$data->database
+				$data->database ?? $data->username,
+				$data->host ?? 'localhost',
+				$data->charset ?? 'UTF8',
+				$data->port ?? 3306
 			);
 		}
 		return static::$_instances[$creds_file];

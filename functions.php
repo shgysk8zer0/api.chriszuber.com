@@ -22,18 +22,7 @@ function exception_handler(Throwable $e)
 	} else {
 		Headers::status(Headers::INTERNAL_SERVER_ERROR);
 		Headers::set('Content-Type', 'application/json');
-		$dtime = new DateTime();
-
-		file_put_contents(ERROR_LOG, sprintf(
-			'[%s %d]: %s "%s" on %s:%d' . PHP_EOL,
-			get_class($e),
-			$e instanceof ErrorException ? $e->getSeverity() : $e->getCode(),
-			$dtime->format(DateTime::W3C),
-			$e->getMessage(),
-			$e->getFile(),
-			$e->getLine()
-		), FILE_APPEND | LOCK_EX);
-
+		log_exception($e);
 		exit(json_encode([
 			'error' => [
 				'message' => 'Internal Server Error',
@@ -41,4 +30,18 @@ function exception_handler(Throwable $e)
 			],
 		]));
 	}
+}
+
+function log_exception(Throwable $e): bool
+{
+	$dtime = new DateTime();
+	return file_put_contents(ERROR_LOG, sprintf(
+		'[%s %d]: %s "%s" on %s:%d' . PHP_EOL,
+		get_class($e),
+		$e instanceof ErrorException ? $e->getSeverity() : $e->getCode(),
+		$dtime->format(DateTime::W3C),
+		$e->getMessage(),
+		$e->getFile(),
+		$e->getLine()
+	), FILE_APPEND | LOCK_EX);
 }
