@@ -4,6 +4,7 @@ namespace shgysk8zer0;
 
 use \DateTime;
 use \PDO;
+use \shgysk8zer0\Token;
 
 final class User implements \JsonSerializable
 {
@@ -29,6 +30,8 @@ final class User implements \JsonSerializable
 
 	private $_pdo      = null;
 
+	private static $_key = null;
+
 	final public function __construct(PDO $pdo)
 	{
 		$this->_pdo = $pdo;
@@ -37,6 +40,8 @@ final class User implements \JsonSerializable
 	final public function __get(string $key)
 	{
 		switch($key) {
+			case 'id':
+				return $this->_id;
 			case 'username':
 				return $this->_username;
 			case 'loggedIn':
@@ -46,7 +51,7 @@ final class User implements \JsonSerializable
 			case 'updated':
 				return $this->_updated;
 			default:
-				throw new \InvalidArgumentError(sprintf('Undefined or invalid property: "%s"', $key));
+				throw new \InvalidArgumentException(sprintf('Undefined or invalid property: "%s"', $key));
 		}
 	}
 
@@ -69,15 +74,52 @@ final class User implements \JsonSerializable
 
 	public function jsonSerialize(): array
 	{
-		return $this->_loggedIn ? [
-			'id'       => $this->_id,
-			'username' => $this->_username,
-			'created'  => $this->_created->format(DateTime::W3C),
-			'updated'  => $this->_updated->format(DateTime::W3C),
-			'loggedIn' => $this->_loggedIn,
-		] : [
-			'loggedIn' => false,
-		];
+		if ($this->_loggedIn) {
+			$data =  [
+				'id'       => $this->_id,
+				'username' => $this->_username,
+				'created'  => $this->_created->format(DateTime::W3C),
+				'updated'  => $this->_updated->format(DateTime::W3C),
+				'loggedIn' => $this->_loggedIn,
+			];
+
+			if (isset(static::$_key)) {
+				$token = new Token();
+				$token->setId($this->_id);
+				$token->setDate(new DateTime());
+				$token->setKey(static::$_key);
+				$data['token'] = "{$token}";
+			}
+			return $data;
+		} else {
+			return [
+				'loggedIn' => false,
+			];
+		}
+	}
+
+	final public function setUser(int $id): bool
+	{
+		$stm = $this->_pdo->prepare(
+			'SELECT `id`, `username`, `password` AS `hash`, `created`, `updated`
+			FROM `users`
+			WHERE `id` = :id
+			LIMIT 1;'
+		);
+		$stm->bindValue(':id', $id);
+
+		if ($stm->execute()) {
+			$data = $stm->fetchObject();
+			$this->_id = intval($data->id);
+			$this->_username = $data->username;
+			$this->_created = new DateTime($data->created);
+			$this->_updated = new DateTime($data->updated);
+			$this->_hash = $data->hash;
+			$this->_loggedIn = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	final public function login(string $username, string $password): bool
@@ -223,26 +265,33 @@ final class User implements \JsonSerializable
 		}
 	}
 
-	static public function getUser(PDO $pdo, Int $id): self
+	final static public function getUser(PDO $pdo = null, Int $id): self
 	{
-		$user = new self($pdo);
-		$stm = $pdo->prepare(
-			'SELECT `id`, `username`, `password` AS `hash`, `created`, `updated`
-			FROM `users`
-			WHERE `id` = :id
-			LIMIT 1;'
-		);
-		$stm->bindValue(':id', $id);
-
-		if ($stm->execute()) {
-			$data = $stm->fetchObject();
-			$user->_id = intval($data->id);
-			$user->_username = $data->username;
-			$user->_created = new DateTime($data->created);
-			$user->_updated = new DateTime($data->updated);
-			$user->_hash = $data->hash;
-			$user->_loggedIn = true;
+		if (is_null($pdo)) {
+			$pdo = PDO::load();
 		}
+		$user = new self($pdo);
+		$user->setUser($id);
 		return $user;
+	}
+
+	final public static function setKey(string $key): void
+	{
+		static::$_key = $key;
+	}
+
+	final static public function loadFromToken(PDO $pdo, string $token): self
+	{
+		if (isset(static::$_key)) {
+			$id = token::validate($token, static::$_key);
+			$user = new self($pdo);
+
+			if ($id !== 0) {
+				$user->setUser($id);
+			}
+			return $user;
+		} else {
+			throw new \Exception('No key set');
+		}
 	}
 }

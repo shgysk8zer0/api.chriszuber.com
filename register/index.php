@@ -4,6 +4,7 @@ namespace Registration;
 
 use \shgysk8zer0\{User, Headers};
 use function \Functions\{get_pdo};
+use const \Consts\{HMAC_KEY};
 
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
 
@@ -18,7 +19,7 @@ switch($_SERVER['REQUEST_METHOD']) {
 		if ($_SERVER['HTTP_ACCEPT'] !== 'application/json') {
 			Headers::status(Headers::NOT_ACCEPTABLE);
 		} else  if (isset($_POST['username'], $_POST['password'])) {
-			$user = new User(get_pdo(CREDS_FILE));
+			$user = new User(get_pdo(CREDS_FILE), file_get_contents(HMAC_KEY));
 
 			if ($user->create($_POST['username'], $_POST['password'])) {
 				echo json_encode($user);

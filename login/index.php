@@ -1,6 +1,6 @@
 <?php
 use \shgysk8zer0\{PDO, User, Headers};
-use const \Consts\{CREDS_FILE};
+use const \Consts\{CREDS_FILE, HMAC_KEY};
 use function \Functions\{get_pdo};
 
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
@@ -16,7 +16,7 @@ switch($_SERVER['REQUEST_METHOD']) {
 		if ($_SERVER['HTTP_ACCEPT'] !== 'application/json') {
 			Headers::status(Headers::NOT_ACCEPTABLE);
 		} else  if (isset($_POST['username'], $_POST['password'])) {
-			$user = new User(get_pdo(CREDS_FILE));
+			$user = new User(PDO::load());
 
 			if ($user->login($_POST['username'], $_POST['password'])) {
 				echo json_encode($user);
