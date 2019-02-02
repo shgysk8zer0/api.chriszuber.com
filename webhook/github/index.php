@@ -18,8 +18,8 @@ try {
 
 		Headers::set('Content-Type', 'application/json');
 		echo(json_encode([
-			'pull' => system('get pull'),
-			'submodule update' => system('git submodule update --init --recursive'),
+			'pull' => exec('git pull'),
+			'submodule update' => exec('git submodule update --init --recursive'),
 		]));
 		// $date = new DateTime();
 		// Headers::set('Content-Type', 'application/json');
