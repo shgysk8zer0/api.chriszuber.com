@@ -18,6 +18,7 @@ try {
 		Headers::set('Content-Type', 'text/plain');
 		echo `git pull`;
 		echo `git submodule update --init --recursive`;
+		echo `git status`;
 		break;
 	case 'OPTIONS':
 	case 'HEAD':
