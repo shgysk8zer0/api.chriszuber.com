@@ -21,9 +21,6 @@ try {
 			'pull' => exec('git pull'),
 			'submodule update' => exec('git submodule update --init --recursive'),
 		]));
-		// $date = new DateTime();
-		// Headers::set('Content-Type', 'application/json');
-		// file_put_contents("{$date->format(\DateTime::W3C)}.json", json_encode($hook, JSON_PRETTY_PRINT));
 		break;
 	case 'OPTIONS':
 	case 'HEAD':
