@@ -7,18 +7,28 @@ use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
 
 final class GitHub implements \JSONSerializable
 {
-	const HOOKSHOT = '/^GitHub-Hookshot/';
-	private $_config = null;
-	private $_data = [];
+	const HOOKSHOT    = '/^GitHub-Hookshot/';
+	const MASTER      = 'refs/heads/master';
+	private $_config  = null;
+	private $_data    = [];
 	private $_payload = null;
-	private $_event = null;
+	private $_event   = null;
 	private $_headers = null;
+	private $_id      = null;
 
 	public function __construct(string $config)
 	{
-		$this->_config = json_decode(file_get_contents($config));
 		$this->_getHeaders();
-		$this->_parse();
+		if (! array_key_exists('x-github-event', $this->_headers)) {
+			throw new HTTPException('Missing X-GitHub-Event header', HTTP::BAD_REQUEST);
+		} elseif (! array_key_exists('x-github-delivery', $this->_headers)) {
+			throw new HTTPException('Missing X-GitHub-Delivery header', HTTP::BAD_REQUEST);
+		} else {
+			$this->_event  = $this->_headers['x-github-event'];
+			$this->_id     = $this->_headers['x-github-delivery'];
+			$this->_config = json_decode(file_get_contents($config));
+			$this->_parse();
+		}
 	}
 
 	public function __debugInfo(): array
@@ -35,20 +45,37 @@ final class GitHub implements \JSONSerializable
 
 	public function __get(string $key)
 	{
-		return $this->_data[$key];
+		switch($key) {
+			case 'event': return $this->_event;
+			case 'id': return $this->_id;
+			case 'length': return (isset($this->length)) ? intval($this->_headers['content-length']) : 0;
+			case 'contentType': return $this->_headers['content-type'];
+			case 'signature': return $this->_headers['x-hub-signature'];
+			default: return $this->_data->{$key};
+		}
 	}
 
 	public function __isset(string $key): bool
 	{
-		return array_key_exists($key, $this->_data);
+		switch($key) {
+			case 'event': return is_string($this->_event);
+			case 'id': return is_string($this->_id);
+			case 'length': return array_key_exists('content-length', $this->_headers);
+			case 'contentType': return array_key_exists('content-type', $this->_headers);
+			case 'signature': return array_key_exists('x-hub-signature', $this->_headers);
+			default: return isset($this->_data->{$key});
+		}
 	}
 
 	public function jsonSerialize(): array
 	{
-		return $this->__debugInfo();
-		// return [
-		// 	'data' => $this->_data,
-		// ];
+		return [
+			'data' => $this->_data,
+		];
+	}
+	public function isMaster(): bool
+	{
+		return isset($this->ref) && $this->ref === self::MASTER;
 	}
 
 	private function  _getHeaders(): bool
@@ -65,37 +92,48 @@ final class GitHub implements \JSONSerializable
 
 	private function _parse(): void
 	{
-		switch(strtolower($this->_headers['content-type'])) {
+		$type = strtolower($this->contentType);
+		$type = preg_replace('/;\s?boundary=[A-z\d]+$/', null, $type);
+		switch($type) {
+		case 'multipart/form-data':
+		case 'x-www-form-url-encoded':
+			throw new HTTPException('Form data currently not supported', HTTP::NOT_IMPLEMENTED);
 		case 'application/json':
-			if (array_key_exists('content-length', $this->_headers)) {
+			if (isset($this->length)) {
 				$payload = file_get_contents('php://input');
-				$length = strlen($payload);
-				$data = json_decode($payload);
+				$length  = strlen($payload);
+				$data    = json_decode($payload);
 
-				if ($length !== intval($this->_headers['content-length'])) {
+				if ($length !== $this->length) {
 					throw new HTTPException('Content-Length does not match payload size', HTTP::BAD_REQUEST);
-				} elseif ($this->_verifySecret($this->_headers['x-hub-signature'], $payload, $this->_config->secret)) {
-					$this->_payload = $payload;
-					$this->_data = $data;
+				} elseif (isset($this->_config->secret)) {
+					if (array_key_exists('x-hub-signature', $this->_headers)) {
+						if ($this->_verifySecret($this->_headers['x-hub-signature'], $payload, $this->_config->secret)) {
+							$this->_payload = $payload;
+							$this->_data = $data;
+						} else {
+							throw new HTTPException('Invalid Signature', HTTP::BAD_REQUEST);
+						}
+					} else {
+						throw new HTTPException('Missing Signature', HTTP::BAD_REQUEST);
+					}
 				} else {
-					throw new HTTPException('Missing or invalid Signature', HTTP::BAD_REQUEST);
 				}
 			} else {
 				throw new HTTPException('Content-Length header required', HTTP::LENGTH_REQUIRED);
 			}
+			break;
+		default:
+			throw new HTTPException(sprintf('Unsupported Content-Type: %s', $type), HTTP::UNSUPPORTED_MEDIA_TYPE);
 		}
 	}
 
 	private function _verifySecret(string $sig, string $payload, string $secret): bool
 	{
 		list($algo, $hmac) = explode('=', $sig, 2) + ['', ''];
-		// header(sprintf('X-Sig: %s', $sig));
-		// header(sprintf('X-Algo: %s', $algo));
-		// header(sprintf('X-HMAC: %s', $hmac));
 
 		if (in_array($algo, hash_algos(), true)) {
-			$hash_hmac = hash_hmac($algo, file_get_contents('php://input'), $secret);
-			// header(sprintf('X-Expected-HMAC: %s', $hash_hmac));
+			$hash_hmac = hash_hmac($algo, $payload, $secret);
 			return hash_equals($hash_hmac, $hmac);
 		} else {
 			throw new HTTPException(sprintf('Unsupported algo: %s', $algo), HTTP::INTERNAL_SERVER_ERROR);
