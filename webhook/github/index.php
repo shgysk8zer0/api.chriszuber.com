@@ -16,8 +16,8 @@ try {
 		$hook = new GitHub(GITHUB_WEBHOOK);
 
 		Headers::set('Content-Type', 'text/plain');
-		`git pull`;
-		`git submodule update --init --recursive`;
+		echo `git pull`;
+		echo `git submodule update --init --recursive`;
 		break;
 	case 'OPTIONS':
 	case 'HEAD':
