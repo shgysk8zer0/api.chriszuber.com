@@ -8,6 +8,7 @@ const DATA_DIR          = BASE . 'data' . DIRECTORY_SEPARATOR;
 const LOGS_DIR          = BASE . 'logs' . DIRECTORY_SEPARATOR;
 const CREDS_FILE        = DATA_DIR . 'creds.json';
 const HMAC_FILE         = DATA_DIR . 'hmac.key';
+const GITHUB_WEBHOOK    = DATA_DIR . 'github.json';
 const SQL_FILE          = DATA_DIR . 'db.sql';
 const ERROR_LOG         = LOGS_DIR . 'errors.log';
 const TIMEZONE          = 'America/Los_Angeles';
