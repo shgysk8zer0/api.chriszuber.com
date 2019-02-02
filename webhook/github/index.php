@@ -21,7 +21,7 @@ try {
 		echo(json_encode([
 			'pull' => exec('git pull'),
 			'submodule update' => exec('git submodule update --init --recursive'),
-			'status' -> 'success 200',
+			'status' => 'success 200',
 		]));
 		break;
 	case 'OPTIONS':
