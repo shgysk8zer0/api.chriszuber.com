@@ -48,5 +48,4 @@ try {
 	Headers::status(Headers::INTERNAL_SERVER_ERROR);
 	Headers::set('Content-Type', 'text/plain');
 	echo 'Internal Server Error' . PHP_EOL;
-	print_r($e);
 }
