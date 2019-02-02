@@ -23,12 +23,12 @@ if (! function_exists('apache_request_headers')) {
 		}
 
 		if (array_key_exists('CONTENT_TYPE', $_SERVER)) {
-			$arh['Content-Type'] = $_SERVER['CONTENT_TYPE']
-		};
+			$arh['Content-Type'] = $_SERVER['CONTENT_TYPE'];
+		}
 
 		if (array_key_exists('CONTENT_LENGTH', $_SERVER)) {
-			$arh['Content-Length'] = $_SERVER['CONTENT_LENGTH']
-		};
+			$arh['Content-Length'] = $_SERVER['CONTENT_LENGTH'];
+		}
 		return $arh;
 	}
 }
