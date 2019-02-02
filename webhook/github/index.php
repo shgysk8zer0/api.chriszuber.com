@@ -16,12 +16,13 @@ try {
 	switch($_SERVER['REQUEST_METHOD']) {
 	case 'POST':
 		$hook = new GitHub(GITHUB_WEBHOOK);
+		$now = new DateTime();
 
 		Headers::set('Content-Type', 'application/json');
 		echo(json_encode([
 			'pull' => exec('git pull'),
 			'submodule update' => exec('git submodule update --init --recursive'),
-			'status' => 'success 200',
+			'dtime' => $now->format(DateTime::W3C),
 		]));
 		break;
 	case 'OPTIONS':
