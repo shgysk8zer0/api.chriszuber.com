@@ -118,6 +118,8 @@ final class GitHub implements \JSONSerializable
 						throw new HTTPException('Missing Signature', HTTP::BAD_REQUEST);
 					}
 				} else {
+					$this->_payload = $payload;
+					$this->_data = $data;
 				}
 			} else {
 				throw new HTTPException('Content-Length header required', HTTP::LENGTH_REQUIRED);
