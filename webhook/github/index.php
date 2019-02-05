@@ -4,7 +4,6 @@ namespace WebHook\GitHub;
 use const \Consts\{GITHUB_WEBHOOK};
 use \shgysk8zer0\{HTTPException, Headers, API};
 use \shgysk8zer0\WebHook\{GitHub};
-use \Throwable;
 
 const METHODS = ['POST', 'OPTIONS','HEAD'];
 
