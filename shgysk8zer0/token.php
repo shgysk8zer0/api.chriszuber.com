@@ -1,5 +1,7 @@
 <?php
 namespace shgysk8zer0;
+use \shgysk8zer0\{HTTPException};
+use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
 use \DateTime;
 
 final class Token implements \JSONSerializable
@@ -75,23 +77,27 @@ final class Token implements \JSONSerializable
 
 	final static function validate(string $token, string $key): int
 	{
-		$json = base64_decode($token);
-		$data = json_decode($json);
-		$now = new DateTime();
-		$hmac = $data->hmac;
-		$expires = new DateTime($data->expires);
-		$date = new DateTime($data->date);
-		$key = hash(self::HASH_ALGO, $key);
-		unset($data->hmac);
-		$gen_hmac = hash_hmac(self::HASH_ALGO, json_encode($data), $key, false);
-		$match = hash_equals($gen_hmac, $hmac);
-		$valid_dates = $now > $data->date and $now < $data->expires;
+		$json = @base64_decode($token);
+		$data = @json_decode($json);
+		if (is_object($data) and isset($data->hmac, $data->expires, $data->date)) {
+			$now = new DateTime();
+			$hmac = $data->hmac;
+			$expires = new DateTime($data->expires);
+			$date = new DateTime($data->date);
+			$key = hash(self::HASH_ALGO, $key);
+			unset($data->hmac);
+			$gen_hmac = hash_hmac(self::HASH_ALGO, json_encode($data), $key, false);
+			$match = hash_equals($gen_hmac, $hmac);
+			$valid_dates = $now > $data->date and $now < $data->expires;
 
-		if ($valid_dates and $match) {
-			return $data->id;
+			if ($valid_dates and $match) {
+				return $data->id;
+			} else {
+				trigger_error("Invalid token/HMAC. Given {$hmac} calculate {$gen_hmac}");
+				return 0;
+			}
 		} else {
-			trigger_error("Invalid token/HMAC. Given {$hmac} calculate {$gen_hmac}");
-			return 0;
+			throw new HTTPException('Invalid token', HTTP::UNAUTHORIZED);
 		}
 	}
 }

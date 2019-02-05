@@ -184,6 +184,11 @@ final class User implements \JsonSerializable
 		return $this->_loggedIn;
 	}
 
+	final public function isAdmin(): bool
+	{
+		return false;
+	}
+
 	final public function create(string $username, string $password): bool
 	{
 		$stm = $this->_pdo->prepare(

@@ -4,40 +4,40 @@ namespace shgysk8zer0;
 
 use \shgysk8zer0\Traits\{CORS};
 use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
-use \shgysk8zer0\{HTTPException};
-
+use \shgysk8zer0\{HTTPException, Headers};
+use \Exception;
 
 class API
 {
 	use CORS;
 
 	const DEFAULT_METHODS = [
+		'HEAD',
+		'OPTIONS',
 		'GET',
 		'POST',
-		'OPTIONS',
-		'HEAD',
 		'DELETE',
 	];
 
 	private $_callbacks = [];
 
-	final public function __construct(string $origin = '*', array $methods = self::DEFAULT_METHODS)
+	final public function __construct(string $origin = '*')
 	{
 		static::allowOrigin($origin);
-		static::allowMethods(...$methods);
 
 		if ($origin !== '*' and $this->origin !== $origin) {
 			throw new HTTPException('Origin not allowed', HTTP::FORBIDDEN);
 		}
 
-		if (! in_array($this->method, $methods)) {
-			static::set('Allow', join(', ', $methods));
+		$this->on('OPTIONS', function(): void
+		{
+			Headers::set('Allow', join(', ', $this->options));
+		});
 
-			throw new HTTPException(
-				sprintf('Allowed methods: %s', join(', ', $methods)),
-				HTTP::METHOD_NOT_ALLOWED
-			);
-		}
+		$this->on('HEAD', function(): void
+		{
+			Headers::set('Allow', join(', ', $this->options));
+		});
 	}
 
 	final public function __get(string $prop)
@@ -48,6 +48,7 @@ class API
 			case 'contenttype': return $_SERVER['CONTENT_TYPE'] ?? null;
 			case 'https': return array_key_exists('HTTPS', $_SERVER) and $_SERVER['HTTPS'] !== 'off';
 			case 'method': return $_SERVER['REQUEST_METHOD'] ?? null;
+			case 'options': return array_keys($this->_callbacks);
 			case 'origin': return $_SERVER['HTTP_ORIGIN'] ?? null;
 			case 'remoteaddr':
 			case 'remoteaddress': return $_SERVER['REMOTE_ADDR'] ?? null;
@@ -92,12 +93,19 @@ class API
 	final public function __invoke(): void
 	{
 		$method = $this->method;
+		static::allowMethods(...$this->options);
+
 		$args = func_get_args();
 		array_unshift($args, $this);
+
 		if (array_key_exists($method, $this->_callbacks)) {
 			foreach ($this->_callbacks[$method] as $callback) {
 				call_user_func_array($callback, $args);
 			}
+		} else {
+			static::set('Allow', join(', ', $this->options));
+
+			throw new HTTPException("Unsupported Method: {$method}", HTTP::METHOD_NOT_ALLOWED);
 		}
 	}
 
@@ -105,13 +113,14 @@ class API
 	{
 		return [
 			'callbacks' => $this->_callbacks,
-			'method' => $this->method,
+			'method'    => $this->method,
 		];
 	}
 
 	final public function on(string $method, callable $callback): void
 	{
 		$method = strtoupper($method);
+
 		if (! array_key_exists($method, $this->_callbacks)) {
 			$this->_callbacks[$method] = [];
 		}

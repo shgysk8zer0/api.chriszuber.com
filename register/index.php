@@ -4,25 +4,10 @@ namespace Registration;
 
 use \shgysk8zer0\{User, PDO, Headers, HTTPException, API};
 
-const METHODS = [
-	'POST',
-	'OPTIONS',
-	'HEAD',
-];
-
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
 
 try {
-	$api = new API('*', METHODS);
-	$api->on('OPTIONS', function(): void
-	{
-		Headers::set('Allow', join(', ', OPTIONS));
-	});
-
-	$api->on('HEAD', function(): void
-	{
-		Headers::set('Allow', join(', ', OPTIONS));
-	});
+	$api = new API('*');
 
 	$api->on('POST', function(API $api): void
 	{
