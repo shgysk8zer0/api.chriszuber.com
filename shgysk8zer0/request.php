@@ -1,11 +1,17 @@
 <?php
 namespace shgysk8zer0;
 use \shgysk8zer0\Traits\{cURL};
+
 class Request
 {
 	use cURL;
 
-	public function __construct(string $url, string $method = 'GET', array $headers = [], array $params = [])
+	public function __construct(
+		string $url,
+		string $method  = 'GET',
+		array  $headers = [],
+		array  $params  = []
+	)
 	{
 		$this->setURL($url);
 		$this->setMethod($method);
@@ -13,7 +19,8 @@ class Request
 		$this->setParams($params);
 	}
 
-	final public function send() {
+	final public function send(): \StdClass
+	{
 		return $this->_send();
 	}
 }
