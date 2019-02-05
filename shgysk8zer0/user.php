@@ -110,13 +110,17 @@ final class User implements \JsonSerializable
 
 		if ($stm->execute()) {
 			$data = $stm->fetchObject();
-			$this->_id = intval($data->id);
-			$this->_username = $data->username;
-			$this->_created = new DateTime($data->created);
-			$this->_updated = new DateTime($data->updated);
-			$this->_hash = $data->hash;
-			$this->_loggedIn = true;
-			return true;
+			if (! isset($data->id)) {
+				return false;
+			} else {
+				$this->_id = intval($data->id);
+				$this->_username = $data->username;
+				$this->_created = new DateTime($data->created);
+				$this->_updated = new DateTime($data->updated);
+				$this->_hash = $data->hash;
+				$this->_loggedIn = true;
+				return true;
+			}
 		} else {
 			return false;
 		}
@@ -259,7 +263,7 @@ final class User implements \JsonSerializable
 			);
 			$stm->bindValue(':id', $this->_id);
 			$stm->execute();
-			return $this->_pdo->rowCount() === 1;
+			return $stm->rowCount() === 1;
 		} else {
 			return false;
 		}

@@ -17,6 +17,7 @@
 	"private": true,
 	"scripts": {
 		"preinstall": "git submodule update --init --recursive",
-		"start": "php -S ${npm_package_config_host}:${npm_package_config_port}"
+		"start": "php -S ${npm_package_config_host}:${npm_package_config_port}",
+		"test": "php lint.php"
 	}
 }

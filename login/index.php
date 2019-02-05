@@ -1,39 +1,47 @@
 <?php
 namespace Login;
-use \shgysk8zer0\{PDO, User, Headers, HTTPException};
-const METHODS = 'POST, OPTIONS, HEAD';
+use \shgysk8zer0\{PDO, User, Headers, HTTPException, API};
+
+const METHODS = [
+	'POST',
+	'OPTIONS',
+	'HEAD',
+];
 
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
 
-Headers::set('Access-Control-Allow-Origin', array_key_exists('HTTP_ORIGIN', $_SERVER) ? $_SERVER['HTTP_ORIGIN'] : '*');
-Headers::set('Access-Control-Allow-Methods', METHODS);
-Headers::set('Allow', METHODS);
-Headers::set('Content-Type', 'application/json');
-Headers::delete('X-Powered-By');
-
 try {
-	switch($_SERVER['REQUEST_METHOD']) {
-		case 'POST':
-			if ($_SERVER['HTTP_ACCEPT'] !== 'application/json') {
-				throw new HTTPException('Accept header must be "applicaiton/json"', Headers::NOT_ACCEPTABLE);
-			} else  if (isset($_POST['username'], $_POST['password'])) {
-				$user = new User(PDO::load());
+	$api = new API('*', METHODS);
+	$api->on('OPTIONS', function(): void
+	{
+		Headers::set('Allow', join(', ', OPTIONS));
+	});
 
-				if ($user->login($_POST['username'], $_POST['password'])) {
-					echo json_encode($user);
-				} else {
-					throw new HTTPException('Invalid username or password', Headers::UNAUTHORIZED);
-				}
+	$api->on('HEAD', function(): void
+	{
+		Headers::set('Allow', join(', ', OPTIONS));
+	});
+
+	$api->on('POST', function(API $api): void
+	{
+		if ($api->accept !== 'application/json') {
+			throw new HTTPException('Accept header must be "applicaiton/json"', Headers::NOT_ACCEPTABLE);
+		} else  if (isset($_POST['username'], $_POST['password'])) {
+			$user = new User(PDO::load());
+
+			if ($user->login($_POST['username'], $_POST['password']) and filter_var($_POST['username'], FILTER_VALIDATE_EMAIL)) {
+				echo json_encode($user);
 			} else {
-				throw new HTTPException('Missing username or password fields', Headers::BAD_REQUEST);
+				throw new HTTPException('Invalid username or password', Headers::UNAUTHORIZED);
 			}
-			break;
-		case 'OPTIONS':
-		case 'HEAD':
-			break;
-		default:
-			throw new HTTPException('Allowed Methods: ' . METHODS, Headers::METHOD_NOT_ALLOWED);
-	}
+		} else {
+			throw new HTTPException('Missing username or password fields', Headers::BAD_REQUEST);
+		}
+	});
+
+	$api();
 } catch (HTTPException $e) {
-	$e();
+	Headers::status($e->getCode());
+	Headers::set('Content-Type', 'application/json');
+	echo json_encode($e);
 }

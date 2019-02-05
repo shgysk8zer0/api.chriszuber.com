@@ -9,6 +9,11 @@ use \DateTime;
 use \Throwable;
 use \ErrorException;
 
+function is_cli(): bool
+{
+	return in_array(PHP_SAPI, ['cli']);
+}
+
 function error_handler(int $errno, string $errstr, string $errfile, int $errline = 0): bool
 {
 	throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
