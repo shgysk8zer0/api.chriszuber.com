@@ -1,9 +1,9 @@
 {
-	"name": "ledger-api",
+	"name": "api.chriszuber.com",
 	"version": "1.0.0",
 	"author": "Chris Zuber <shgysk8zer0@gmail.com>",
 	"license": "MIT",
-	"description": "A ledger API written in PHP & MySQL",
+	"description": "An API written in PHP & MySQL",
 	"keywords": [
 		"PHP",
 		"MySQL",
