@@ -2,12 +2,18 @@
 
 namespace Functions;
 
-use const \Consts\{DEBUG, ERROR_LOG};
+use const \Consts\{DEBUG, ERROR_LOG, UPLOADS_DIR};
 use \shgysk8zer0\{PDO, User, JSONFILE, Headers, HTTPException};
 use \StdClass;
 use \DateTime;
 use \Throwable;
 use \ErrorException;
+
+function upload_path(): string
+{
+	$date = new DateTime();
+	return UPLOADS_DIR . $date->format(sprintf('Y%sm%s', DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR));
+}
 
 function is_cli(): bool
 {
