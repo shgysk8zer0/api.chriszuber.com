@@ -3,3 +3,5 @@
 /data/github.json
 *.log
 *.bak
+uploads/
+!uploads/index.php

@@ -1,11 +1,11 @@
 <?php
-
 namespace Consts;
 
 const DEBUG             = true;
 const BASE              = __DIR__ . DIRECTORY_SEPARATOR;
 const DATA_DIR          = BASE . 'data' . DIRECTORY_SEPARATOR;
 const LOGS_DIR          = BASE . 'logs' . DIRECTORY_SEPARATOR;
+const UPLOADS_DIR       = BASE . 'uploads' . DIRECTORY_SEPARATOR;
 const CREDS_FILE        = DATA_DIR . 'creds.json';
 const HMAC_FILE         = DATA_DIR . 'hmac.key';
 const GITHUB_WEBHOOK    = DATA_DIR . 'github.json';
