@@ -186,7 +186,7 @@ final class User implements \JsonSerializable
 
 	final public function isAdmin(): bool
 	{
-		return false;
+		return $_SERVER['SERVER_NAME'] === 'localhost';
 	}
 
 	final public function create(string $username, string $password): bool

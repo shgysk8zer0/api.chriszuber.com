@@ -15,6 +15,16 @@ function upload_path(): string
 	return UPLOADS_DIR . $date->format(sprintf('Y%sm%s', DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR));
 }
 
+function https(): bool
+{
+	return array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS']);
+}
+
+function dnt(): bool
+{
+	return array_key_exists('HTTP_DNT', $_SERVER) and $_SERVER['HTTP_DNT'] === '1';
+}
+
 function is_cli(): bool
 {
 	return in_array(PHP_SAPI, ['cli']);

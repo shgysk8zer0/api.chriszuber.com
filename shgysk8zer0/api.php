@@ -4,10 +4,10 @@ namespace shgysk8zer0;
 
 use \shgysk8zer0\Traits\{CORS};
 use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
-use \shgysk8zer0\{HTTPException, Headers};
+use \shgysk8zer0\{HTTPException, Headers, URL};
 use \Exception;
 
-class API
+class API implements \JSONSerializable
 {
 	use CORS;
 
@@ -20,10 +20,12 @@ class API
 	];
 
 	private $_callbacks = [];
+	private $_url = null;
 
 	final public function __construct(string $origin = '*')
 	{
 		static::allowOrigin($origin);
+		$this->_url = URL::getRequestUrl();
 
 		if ($origin !== '*' and $this->origin !== $origin) {
 			throw new HTTPException('Origin not allowed', HTTP::FORBIDDEN);
@@ -46,21 +48,24 @@ class API
 			case 'accept': return $_SERVER['HTTP_ACCEPT'] ?? '*/*';
 			case 'contentlength': return $_SERVER['CONTENT_LENGTH'] ?? 0;
 			case 'contenttype': return $_SERVER['CONTENT_TYPE'] ?? null;
-			case 'https': return array_key_exists('HTTPS', $_SERVER) and $_SERVER['HTTPS'] !== 'off';
+			case 'dnt': return array_key_exists('HTTP_DNT', $_SERVER) and $_SERVER['HTTP_DNT'] === '1';
+			case 'files': return $_FILES;
+			case 'headers': return getallheaders();
+			case 'https': return $this->_url->protocol === 'https:';
 			case 'method': return $_SERVER['REQUEST_METHOD'] ?? null;
 			case 'options': return array_keys($this->_callbacks);
-			case 'origin': return $_SERVER['HTTP_ORIGIN'] ?? null;
+			case 'origin': return $this->_url->origin;
 			case 'remoteaddr':
 			case 'remoteaddress': return $_SERVER['REMOTE_ADDR'] ?? null;
 			case 'remotehost': return $_SERVER['REMOTE_HOST'] ?? null;
 			case 'referer':
 			case 'referrer': return $_SERVER['HTTP_REFERER'] ?? null;
 			case 'requesturi':
-			case 'requesturl': return $_SERVER['REQUEST_URI'] ?? null;
+			case 'requesturl': "{$this->_url}";
 			case 'serveraddress': return $_SERVER['SERVER_ADDR'];
 			case 'servername': return $_SERVER['SERVER_NAME'];
+			case 'url': return $this->_url;
 			case 'useragent': return $_SERVER['HTTP_USER_AGENT'] ?? null;
-			case 'files': return $_FILES;
 			default: throw new \Exception(sprintf('Unknown property: %s', $prop));
 		}
 	}
@@ -114,6 +119,22 @@ class API
 		return [
 			'callbacks' => $this->_callbacks,
 			'method'    => $this->method,
+			'url'       => $this->_url,
+			'request'   => $_REQUEST,
+			'headers'   => $this->headers,
+			'options'   => $this->options,
+		];
+	}
+
+	final public function jsonSerialize(): array
+	{
+		return [
+			'method'    => $this->method,
+			'url'       => $this->_url,
+			'request'   => $_REQUEST,
+			'headers'   => $this->headers,
+			'options'   => $this->options,
+			'DNT'       => $this->dnt,
 		];
 	}
 

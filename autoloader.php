@@ -9,10 +9,11 @@ use const \Consts\{
 	ERROR_HANDLER,
 	EXCEPTION_HANDLER,
 	HMAC_FILE,
-	CREDS_FILE
+	CREDS_FILE,
+	HOST
 };
 
-use \shgysk8zer0\{User, PDO};
+use \shgysk8zer0\{User, PDO, UploadFile};
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'shims.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'consts.php');
@@ -32,6 +33,7 @@ try {
 	}
 
 	User::setKey(file_get_contents(HMAC_FILE));
+	UploadFile::setHost(HOST);
 
 	if (FILE_EXISTS(CREDS_FILE)) {
 		PDO::setCredsFile(CREDS_FILE);
