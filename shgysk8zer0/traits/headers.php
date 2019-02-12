@@ -44,7 +44,7 @@ trait Headers
 		http_response_code($code);
 	}
 
-	final private static function _getHeaders(): void
+	final protected static function _getHeaders(): void
 	{
 		if (! empty(static::$_headers)) {
 			$headers = get_all_headers();

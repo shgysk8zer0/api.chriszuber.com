@@ -8,6 +8,7 @@ use \JSONSerializable;
 
 class UploadFile implements JSONSerializable
 {
+	private static $_host = '';
 	private $_uploadPath  = null;
 	private $_path        = null;
 	private $_size        = 0;
@@ -18,9 +19,11 @@ class UploadFile implements JSONSerializable
 	{
 		if (! array_key_exists($key, $_FILES)) {
 			throw new InvalidArgumentException("Undefined file: {$key}");
-		} elseif (! array_key_exists('tmp_name', $_FILES[$key])) {
+		} elseif (! array_key_exists('tmp_name', $_FILES[$key]) || $_FILES[$key]['tmp_name'] === '') {
 			throw new Exception("Invalid file: {$key}");
 		} elseif (! is_uploaded_file($_FILES[$key]['tmp_name'])) {
+			header('Content-Type: application/json');
+			exit(json_encode($_FILES[$key]));
 			throw new Exception("Invalid upload: {$_FILES[$key]['tmp_name']}");
 		} elseif ($_FILES[$key]['error'] !== UPLOAD_ERR_OK) {
 			switch ($_FILES[$key]['error']) {
@@ -62,6 +65,7 @@ class UploadFile implements JSONSerializable
 			case 'moved': return $this->isMoved();
 			case 'extension': return pathinfo($this->_name, PATHINFO_EXTENSION);
 			case 'uploadPath': return $this->_uploadPath;
+			case 'url': return $this->getUrl();
 		}
 	}
 
@@ -76,12 +80,29 @@ class UploadFile implements JSONSerializable
 			'type'       => $this->_type,
 			'extension'  => $this->extension,
 			'moved'      => $this->isMoved(),
+			'url'        => $this->getUrl(),
 		];
 	}
 
 	final public function isMoved(): bool
 	{
 		return isset($this->_path);
+	}
+
+	final public function getUrl(string $host = ''): string
+	{
+		if ($host === '') {
+			$host = static::$_host;
+		}
+		if ($this->isMoved()) {
+			$path = str_replace($_SERVER['DOCUMENT_ROOT'], null, $this->_path);
+			if (DIRECTORY_SEPARATOR !== '/') {
+				$path = preg_replace('/' . preg_escape(DIRECTORY_SEPARATOR, '/') . '/', '/', $path);
+			}
+			return $host . $path;
+		} else {
+			return null;
+		}
 	}
 
 	final public function getHash(): string
@@ -105,5 +126,10 @@ class UploadFile implements JSONSerializable
 		} else {
 			return false;
 		}
+	}
+
+	final public static function setHost(string $host): void
+	{
+		static::$_host = $host;
 	}
 }
