@@ -26,3 +26,4 @@ try {
 	Headers::status(HTTP::INTERNAL_SERVER_ERROR);
 	Headers::set('Content-Type', 'text/plain');
 	exit('Internal Server Error');
+}
