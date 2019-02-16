@@ -13,5 +13,6 @@ if ($git->isMaster()) {
 	echo $git->pull() . PHP_EOL;
 	echo $git->updateSubmodules() . PHP_EOL;
 	echo $git->status() . PHP_EOL;
-	echo $git->isClean() ? 'Clean' : 'Not clean';
 }
+echo $git->isClean() ? 'Clean' : 'Not clean';
+echo PHP_EOL;
