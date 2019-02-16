@@ -26,3 +26,18 @@ define(__NAMESPACE__ . '\HOST', sprintf('%s://%s',
 	(array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS'])) ? 'https' : 'http',
 	$_SERVER['HTTP_HOST'] ?? 'localhost'
 ));
+
+define(
+	__NAMESPACE__ . '\BASE_URI',
+	sprintf(
+		'%s/%s',
+		HOST,
+		(DIRECTORY_SEPARATOR === '/')
+			? str_replace(__DIR__, $_SERVER['DOCUMENT_ROOT'], null)
+			: str_replace(
+				DIRECTORY_SEPARATOR,
+				'/',
+				str_replace($_SERVER['DOCUMENT_ROOT'], null, __DIR__)
+			)
+	)
+);
