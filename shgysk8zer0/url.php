@@ -9,7 +9,7 @@ class URL extends Ports implements \JSONSerializable
 	private $_username = '';
 	private $_password = '';
 	private $_hostname = 'localhost';
-	private $_port = 80;
+	private $_port = null;
 	private $_pathname = '/';
 	private $_searchParams = null;
 	private $_hash = '';
@@ -59,10 +59,10 @@ class URL extends Ports implements \JSONSerializable
 			case 'username':     return $this->_username;
 			case 'password':     return $this->_password;
 			case 'hostname':     return $this->_hostname;
-			case 'host':         return $this->_isDefaultPort($this->protocol, $this->_port)
+			case 'host':         return $this->_isDefaultPort($this->protocol, $this->port)
 				? $this->_hostname
 				: "{$this->_hostname}:{$this->_port}";
-			case 'port':         return $this->_port;
+			case 'port':         return isset($this->_port) ? $this->_port : $this->_getDefaultPort($this->protocol);
 			case 'pathname':     return $this->_pathname;
 			case 'search':       return "{$this->_searchParams}";
 			case 'searchParams': return $this->_searchParams;
@@ -222,7 +222,9 @@ class URL extends Ports implements \JSONSerializable
 
 	final public static function getRequestUrl(): self
 	{
-		$url = array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
+		$url = (array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS']))
+			? 'https://'
+			: 'http://';
 		if (array_key_exists('PHP_AUTH_USER', $_SERVER)) {
 			$url .= urlencode($_SERVER['PHP_AUTH_USER']);
 			if (array_key_exists('PHP_AUTH_PW', $_SERVER)) {
