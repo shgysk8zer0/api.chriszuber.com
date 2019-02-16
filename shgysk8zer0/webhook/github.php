@@ -4,9 +4,11 @@ namespace shgysk8zer0\WebHook;
 
 use \shgysk8zer0\{HTTPException};
 use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
+use \shgysk8zer0\Traits\{Git};
 
 final class GitHub implements \JSONSerializable
 {
+	use Git;
 	const HOOKSHOT    = '/^GitHub-Hookshot/';
 	const MASTER      = 'refs/heads/master';
 	private $_config  = null;
