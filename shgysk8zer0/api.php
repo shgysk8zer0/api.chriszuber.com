@@ -52,7 +52,7 @@ class API implements \JSONSerializable
 			case 'files': return $_FILES;
 			case 'headers': return getallheaders();
 			case 'https': return $this->_url->protocol === 'https:';
-			case 'method': return $_SERVER['REQUEST_METHOD'] ?? null;
+			case 'method': return $_SERVER['REQUEST_METHOD'] ?? 'GET';
 			case 'options': return array_keys($this->_callbacks);
 			case 'origin': return $this->_url->origin;
 			case 'remoteaddr':

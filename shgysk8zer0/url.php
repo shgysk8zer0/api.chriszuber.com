@@ -222,7 +222,9 @@ class URL extends Ports implements \JSONSerializable
 
 	final public static function getRequestUrl(): self
 	{
-		$url = array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
+		$url = (array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS']))
+			? 'https://'
+			: 'http://';
 		if (array_key_exists('PHP_AUTH_USER', $_SERVER)) {
 			$url .= urlencode($_SERVER['PHP_AUTH_USER']);
 			if (array_key_exists('PHP_AUTH_PW', $_SERVER)) {
