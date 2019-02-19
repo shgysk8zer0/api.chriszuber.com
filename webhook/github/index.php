@@ -18,12 +18,15 @@ try {
 				break;
 			case 'push':
 				Headers::set('Content-Type', 'text/plain');
-				if ($hook->isMaster()) {
-					echo `git pull`;
-					echo `git submodule update --init --recursive`;
-					echo `git status`;
+				if (! $hook->isMaster()) {
+					echo sprintf('Not updating non-master branch, "%s"', $hook->getBranch());
+				} elseif (! $hook->isClean()) {
+					echo 'Not updating non-clean working directory' . PHP_EOL;
+					echo $hook->status();
 				} else {
-					echo 'Not updating non-master branch';
+					echo $hook->pull() . PHP_EOL;
+					echo $hook->updateSubmodules() . PHP_EOL;
+					echo $hook->status();
 				}
 				break;
 			default:
