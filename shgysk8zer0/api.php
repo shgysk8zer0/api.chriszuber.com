@@ -48,7 +48,7 @@ class API implements \JSONSerializable
 			case 'accept': return $_SERVER['HTTP_ACCEPT'] ?? '*/*';
 			case 'contentlength': return $_SERVER['CONTENT_LENGTH'] ?? 0;
 			case 'contenttype': return $_SERVER['CONTENT_TYPE'] ?? null;
-			case 'dnt': return array_key_exists('HTTP_DNT', $_SERVER) and $_SERVER['HTTP_DNT'] === '1';
+			case 'dnt': return array_key_exists('HTTP_DNT', $_SERVER) and ! empty($_SERVER['HTTP_DNT']);
 			case 'files': return $_FILES;
 			case 'headers': return getallheaders();
 			case 'https': return $this->_url->protocol === 'https:';

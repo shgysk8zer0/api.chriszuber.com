@@ -9,7 +9,7 @@ class URL extends Ports implements \JSONSerializable
 	private $_username = '';
 	private $_password = '';
 	private $_hostname = 'localhost';
-	private $_port = 80;
+	private $_port = null;
 	private $_pathname = '/';
 	private $_searchParams = null;
 	private $_hash = '';
@@ -59,10 +59,10 @@ class URL extends Ports implements \JSONSerializable
 			case 'username':     return $this->_username;
 			case 'password':     return $this->_password;
 			case 'hostname':     return $this->_hostname;
-			case 'host':         return $this->_isDefaultPort($this->protocol, $this->_port)
+			case 'host':         return $this->_isDefaultPort($this->protocol, $this->port)
 				? $this->_hostname
 				: "{$this->_hostname}:{$this->_port}";
-			case 'port':         return $this->_port;
+			case 'port':         return $this->_port ?? $this->_getDefaultPort($this->protocol);
 			case 'pathname':     return $this->_pathname;
 			case 'search':       return "{$this->_searchParams}";
 			case 'searchParams': return $this->_searchParams;
@@ -189,7 +189,7 @@ class URL extends Ports implements \JSONSerializable
 
 	final private function _setPathname(string $pathname): void
 	{
-		$this->_pathname = $pathname;
+		$this->_pathname = '/' . ltrim($pathname, '/');
 	}
 
 	final private function _setSearch(string $query): void
@@ -204,7 +204,7 @@ class URL extends Ports implements \JSONSerializable
 
 	final private function _setHash(string $hash): void
 	{
-		$this->_hash = $hash;
+		$this->_hash = ltrim($hash, '#');
 	}
 
 	final private function _getHref(): string
