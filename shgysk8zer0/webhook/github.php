@@ -4,9 +4,11 @@ namespace shgysk8zer0\WebHook;
 
 use \shgysk8zer0\{HTTPException};
 use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
+use \shgysk8zer0\Traits\{Git};
 
 final class GitHub implements \JSONSerializable
 {
+	use Git;
 	const HOOKSHOT    = '/^GitHub-Hookshot/';
 	const MASTER      = 'refs/heads/master';
 	private $_config  = null;
@@ -40,6 +42,9 @@ final class GitHub implements \JSONSerializable
 			'$_SERVER' => $_SERVER,
 			'headers'  => $this->_headers,
 			'event'    => $this->_event,
+			'branch'   => $this->getBranch(),
+			'clean'    => $this->isClean(),
+			'status'   => explode($this->status()),
 		];
 	}
 
@@ -70,7 +75,11 @@ final class GitHub implements \JSONSerializable
 	public function jsonSerialize(): array
 	{
 		return [
-			'data' => $this->_data,
+			'data'     => $this->_data,
+			'event'    => $this->_event,
+			'branch'   => $this->getBranch(),
+			'clean'    => $this->isClean(),
+			'status'   => explode(PHP_EOL, $this->status()),
 		];
 	}
 	public function isMaster(): bool

@@ -11,7 +11,7 @@ final class URLSearchParams implements \JSONSerializable
 	final public function __construct(string $query = '')
 	{
 		if ($query !== '') {
-			parse_str($query, $params);
+			parse_str(ltrim($query, '?'), $params);
 			$this->_params = $params;
 		}
 	}
