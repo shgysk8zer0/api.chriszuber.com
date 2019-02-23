@@ -33,6 +33,16 @@ trait Headers
 	{
 		header_remove($key);
 	}
+	final public static function redirect(string $url, bool $permenant = false): void
+	{
+		if (! static::sent()) {
+			static::set('Location', $url);
+			static::status($permenant ? HTTP::PERMANENT_REDIRECT : HTTP::TEMPORARY_REDIRECT);
+			exit();
+		} else {
+			trigger_error('Attempting to redirect when headers already sent');
+		}
+	}
 
 	final public static function sent(): bool
 	{
@@ -42,6 +52,11 @@ trait Headers
 	final public static function status(int $code = HTTP::OK): void
 	{
 		http_response_code($code);
+	}
+
+	final public static function contentType(string $content_type): void
+	{
+		static::set('Content-Type', $content_type);
 	}
 
 	final protected static function _getHeaders(): void

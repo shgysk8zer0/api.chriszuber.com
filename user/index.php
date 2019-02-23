@@ -23,6 +23,24 @@ try {
 		}
 	});
 
+	$api->on('POST', function(API $api): void
+	{
+		if ($api->accept !== 'application/json') {
+			throw new HTTPException('Accept header must be "application/json"', Headers::NOT_ACCEPTABLE);
+		} elseif (isset($_POST['username'], $_POST['password']) and filter_var($_POST['username'], FILTER_VALIDATE_EMAIL)) {
+			$api->contentType = 'application/json';
+			$user = new User(PDO::load());
+
+			if ($user->create($_POST['username'], $_POST['password'])) {
+				echo json_encode($user);
+			} else {
+				throw new HTTPException('Error registering user', Headers::UNAUTHORIZED);
+			}
+		} else {
+			throw new HTTPException('Missing or invalid username or password fields', Headers::BAD_REQUEST);
+		}
+	});
+
 	$api->on('DELETE', function(API $api): void
 	{
 		if (! array_key_exists('token', $_GET)) {

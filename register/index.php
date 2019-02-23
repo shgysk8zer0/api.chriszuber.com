@@ -1,34 +1,18 @@
 <?php
-
 namespace Registration;
-
-use \shgysk8zer0\{User, PDO, Headers, HTTPException, API};
-
+use \shgysk8zer0\{Headers, URL, API, HTTPException};
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
 
 try {
 	$api = new API('*');
-
-	$api->on('POST', function(API $api): void
+	$api->on('POST', function(API $request): void
 	{
-		if ($api->accept !== 'application/json') {
-			throw new HTTPException('Accept header must be "application/json"', Headers::NOT_ACCEPTABLE);
-		} elseif (isset($_POST['username'], $_POST['password']) and filter_var($_POST['username'], FILTER_VALIDATE_EMAIL)) {
-			$api->contentType = 'application/json';
-			$user = new User(PDO::load());
-
-			if ($user->create($_POST['username'], $_POST['password'])) {
-				echo json_encode($user);
-			} else {
-				throw new HTTPException('Error registering user', Headers::UNAUTHORIZED);
-			}
-		} else {
-			throw new HTTPException('Missing or invalid username or password fields', Headers::BAD_REQUEST);
-		}
+		$request->url->pathname = '/user/';
+		$request->redirect($request->url, true);
 	});
 	$api();
-} catch (HTTPException $e) {
+} catch(HTTPEXception $e) {
 	Headers::status($e->getCode());
-	Headers::set('Content-Type', 'application/json');
+	Headers::contentType('application/json');
 	echo json_encode($e);
 }
