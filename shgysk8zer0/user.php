@@ -30,6 +30,8 @@ final class User implements \JsonSerializable
 
 	private $_pdo      = null;
 
+	private $_token    = null;
+
 	private static $_key = null;
 
 	final public function __construct(PDO $pdo)
@@ -50,6 +52,15 @@ final class User implements \JsonSerializable
 				return $this->_created;
 			case 'updated':
 				return $this->_updated;
+			case 'token':
+				if (is_null($this->_token) and isset(static::$_key) and $this->loggedIn) {
+					$token = new Token();
+					$token->setId($this->_id);
+					$token->setDate(new DateTime());
+					$token->setKey(static::$_key);
+					$this->_token = "{$token}";
+				}
+				return $this->_token;
 			default:
 				throw new \InvalidArgumentException(sprintf('Undefined or invalid property: "%s"', $key));
 		}
@@ -74,26 +85,25 @@ final class User implements \JsonSerializable
 
 	public function jsonSerialize(): array
 	{
-		if ($this->_loggedIn) {
-			$data =  [
+		if ($this->loggedIn) {
+			return [
 				'id'       => $this->_id,
 				'username' => $this->_username,
+				'token'    => $this->token,
 				'created'  => $this->_created->format(DateTime::W3C),
 				'updated'  => $this->_updated->format(DateTime::W3C),
-				'loggedIn' => $this->_loggedIn,
+				'loggedIn' => $this->loggedIn,
+				'isAdmin'  => $this->isAdmin(),
 			];
-
-			if (isset(static::$_key)) {
-				$token = new Token();
-				$token->setId($this->_id);
-				$token->setDate(new DateTime());
-				$token->setKey(static::$_key);
-				$data['token'] = "{$token}";
-			}
-			return $data;
 		} else {
 			return [
+				'id'       => null,
+				'username' => null,
+				'token'    => null,
+				'created'  => null,
+				'updated'  => null,
 				'loggedIn' => false,
+				'isAdmin'  => false,
 			];
 		}
 	}
@@ -297,6 +307,7 @@ final class User implements \JsonSerializable
 
 			if ($id !== 0) {
 				$user->setUser($id);
+				$user->_token = $token;
 			}
 			return $user;
 		} else {

@@ -39,6 +39,7 @@ class API implements \JSONSerializable
 		$this->on('HEAD', function(): void
 		{
 			Headers::set('Allow', join(', ', $this->options));
+			Headers::set('Content-Type', 'application/json');
 		});
 	}
 
@@ -146,5 +147,10 @@ class API implements \JSONSerializable
 			$this->_callbacks[$method] = [];
 		}
 		$this->_callbacks[$method][] = $callback;
+	}
+
+	final public function redirect(URL $url, bool $permenant): void
+	{
+		Headers::redirect($url, $permenant);
 	}
 }
