@@ -139,7 +139,7 @@ class API implements \JSONSerializable
 			'request'   => $_REQUEST,
 			'headers'   => $this->headers,
 			'cookies'   => $this->cookies,
-			'session'   => $this->session,
+			'session'   => Session::active() ? $this->session : null,
 			'options'   => $this->options,
 			'DNT'       => $this->dnt,
 		];
