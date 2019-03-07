@@ -8,13 +8,14 @@ require_once  dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php';
 
 try {
 	$api = new API('*');
-	$api->on('GET', function(): void
+	$api->on('GET', function(API $request): void
 	{
 		Headers::set('Content-Type', 'application/json');
 		echo json_encode([
 			'HOST' => HOST,
 			'BASE_URI' => BASE_URI,
 			'url' => URL::getRequestUrl(),
+			'request' => $request,
 		]);
 	});
 	$api();

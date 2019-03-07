@@ -49,6 +49,7 @@ class API implements \JSONSerializable
 			case 'accept': return $_SERVER['HTTP_ACCEPT'] ?? '*/*';
 			case 'contentlength': return $_SERVER['CONTENT_LENGTH'] ?? 0;
 			case 'contenttype': return $_SERVER['CONTENT_TYPE'] ?? null;
+			case 'cookies': return Cookies::getInstance();
 			case 'dnt': return array_key_exists('HTTP_DNT', $_SERVER) and ! empty($_SERVER['HTTP_DNT']);
 			case 'files': return $_FILES;
 			case 'headers': return getallheaders();
@@ -65,6 +66,7 @@ class API implements \JSONSerializable
 			case 'requesturl': "{$this->_url}";
 			case 'serveraddress': return $_SERVER['SERVER_ADDR'];
 			case 'servername': return $_SERVER['SERVER_NAME'];
+			case 'session': return Session::getInstance();
 			case 'url': return $this->_url;
 			case 'useragent': return $_SERVER['HTTP_USER_AGENT'] ?? null;
 			default: throw new \Exception(sprintf('Unknown property: %s', $prop));
@@ -123,6 +125,8 @@ class API implements \JSONSerializable
 			'url'       => $this->_url,
 			'request'   => $_REQUEST,
 			'headers'   => $this->headers,
+			'cookies'   => $this->cookies,
+			'session'   => $this->session,
 			'options'   => $this->options,
 		];
 	}
@@ -134,6 +138,8 @@ class API implements \JSONSerializable
 			'url'       => $this->_url,
 			'request'   => $_REQUEST,
 			'headers'   => $this->headers,
+			'cookies'   => $this->cookies,
+			'session'   => Session::active() ? $this->session : null,
 			'options'   => $this->options,
 			'DNT'       => $this->dnt,
 		];
