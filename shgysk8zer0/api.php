@@ -52,11 +52,13 @@ class API implements \JSONSerializable
 			case 'cookies': return Cookies::getInstance();
 			case 'dnt': return array_key_exists('HTTP_DNT', $_SERVER) and ! empty($_SERVER['HTTP_DNT']);
 			case 'files': return array_keys($_FILES);
+			case 'get': return GetData::getInstance();
 			case 'headers': return getallheaders();
 			case 'https': return $this->_url->protocol === 'https:';
 			case 'method': return $_SERVER['REQUEST_METHOD'] ?? 'GET';
 			case 'options': return array_keys($this->_callbacks);
 			case 'origin': return $this->_url->origin;
+			case 'post': return FormData::getInstance();
 			case 'remoteaddr':
 			case 'remoteaddress': return $_SERVER['REMOTE_ADDR'] ?? null;
 			case 'remotehost': return $_SERVER['REMOTE_HOST'] ?? null;
@@ -122,7 +124,7 @@ class API implements \JSONSerializable
 		return [
 			'callbacks' => $this->_callbacks,
 			'method'    => $this->method,
-			'url'       => $this->_url,
+			'url'       => $this->url,
 			'request'   => $_REQUEST,
 			'headers'   => $this->headers,
 			'cookies'   => $this->cookies,
@@ -136,8 +138,10 @@ class API implements \JSONSerializable
 	{
 		return [
 			'method'    => $this->method,
-			'url'       => $this->_url,
+			'url'       => $this->url,
 			'request'   => $_REQUEST,
+			'get'       => $this->get,
+			'post'      => $this->post,
 			'headers'   => $this->headers,
 			'cookies'   => $this->cookies,
 			'files'     => $this->files,
@@ -176,6 +180,18 @@ class API implements \JSONSerializable
 		} else {
 			return $_POST[$key];
 		}
+	}
+
+	final public function has(string ...$keys): bool
+	{
+		$valid = true;
+		foreach ($keys as $key) {
+			if (! array_key_exists($key, $_REQUEST)) {
+				$valid = false;
+				break;
+			}
+		}
+		return $valid;
 	}
 
 	final public function file(string $key)
