@@ -72,15 +72,13 @@ class UploadFile implements JSONSerializable
 	final public function jsonSerialize(): array
 	{
 		return [
-			'uploadPath' => $this->_uploadPath,
-			'path'       => $this->_path,
-			'hash'       => $this->getHash(),
 			'name'       => $this->_name,
-			'size'       => $this->_size,
 			'type'       => $this->_type,
 			'extension'  => $this->extension,
-			'moved'      => $this->isMoved(),
-			'url'        => $this->getUrl(),
+			'size'       => $this->_size,
+			'url'        => $this->isMoved() ? $this->getUrl() : null,
+			'hash'       => $this->getHash(),
+			'saved'      => $this->isMoved(),
 		];
 	}
 

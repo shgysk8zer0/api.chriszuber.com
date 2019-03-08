@@ -1,30 +1,34 @@
 <?php
 namespace Test;
-use \shgysk8zer0\{API, URL, Headers, HTTPException};
+use \shgysk8zer0\{API, Headers, HTTPException};
 use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
-use const \Consts\{HOST, BASE_URI};
-use \Throwable;
+
 require_once  dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php';
 
 try {
 	$api = new API('*');
+
 	$api->on('GET', function(API $request): void
 	{
-		Headers::set('Content-Type', 'application/json');
-		echo json_encode([
-			'HOST' => HOST,
-			'BASE_URI' => BASE_URI,
-			'url' => URL::getRequestUrl(),
-			'request' => $request,
-		]);
+		Headers::contentType('application/json');
+		echo json_encode($request);
 	});
+
+	$api->on('POST', function(API $request): void
+	{
+		Headers::contentType('application/json');
+		echo json_encode($request);
+	});
+
+	$api->on('DELETE', function(API $request): void
+	{
+		Headers::contentType('application/json');
+		echo json_encode($request);
+	});
+
 	$api();
 } catch (HTTPException $e) {
 	Headers::status($e->getCode());
 	Headers::set('Content-Type', 'application/json');
 	echo json_encode($e);
-} catch(\Throwable $e) {
-	Headers::status(HTTP::INTERNAL_SERVER_ERROR);
-	Headers::set('Content-Type', 'text/plain');
-	exit('Internal Server Error');
 }

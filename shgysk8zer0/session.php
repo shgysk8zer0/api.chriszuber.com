@@ -42,7 +42,7 @@ final class Session implements \Iterator, \JSONSerializable
 				$secure = array_key_exists('HTTPS', $_SERVER) and ! empty($_server['HTTPS']);
 			}
 			if (is_null($domain)) {
-				$domain = URL::getRequestUrl()->origin;
+				$domain = URL::getRequestUrl()->hostname;
 			}
 			//Avoid trying to figure out cookie paramaters for CLI
 			if (PHP_SAPI !== 'cli') {
@@ -57,6 +57,7 @@ final class Session implements \Iterator, \JSONSerializable
 				}
 			}
 			session_start();
+			$cookie[session_name()] = session_id();
 		}
 
 		if (is_null(static::$_instance)) {
@@ -233,6 +234,11 @@ final class Session implements \Iterator, \JSONSerializable
 		return session_get_cookie_params();
 	}
 
+	final public function getId(): string
+	{
+		return session_id();
+	}
+
 	final public static function status(): int
 	{
 		return session_status();
@@ -247,6 +253,7 @@ final class Session implements \Iterator, \JSONSerializable
 	{
 		return static::status() === PHP_SESSION_DISABLED;
 	}
+
 
 	final public static function getInstance(): self
 	{
