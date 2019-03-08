@@ -51,7 +51,7 @@ class API implements \JSONSerializable
 			case 'contenttype': return $_SERVER['CONTENT_TYPE'] ?? null;
 			case 'cookies': return Cookies::getInstance();
 			case 'dnt': return array_key_exists('HTTP_DNT', $_SERVER) and ! empty($_SERVER['HTTP_DNT']);
-			case 'files': return $_FILES;
+			case 'files': return array_keys($_FILES);
 			case 'headers': return getallheaders();
 			case 'https': return $this->_url->protocol === 'https:';
 			case 'method': return $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -127,6 +127,7 @@ class API implements \JSONSerializable
 			'headers'   => $this->headers,
 			'cookies'   => $this->cookies,
 			'session'   => $this->session,
+			'files'     => $this->files,
 			'options'   => $this->options,
 		];
 	}
@@ -139,7 +140,7 @@ class API implements \JSONSerializable
 			'request'   => $_REQUEST,
 			'headers'   => $this->headers,
 			'cookies'   => $this->cookies,
-			'session'   => Session::active() ? $this->session : null,
+			'files'     => $this->files,
 			'options'   => $this->options,
 			'DNT'       => $this->dnt,
 		];
@@ -153,6 +154,42 @@ class API implements \JSONSerializable
 			$this->_callbacks[$method] = [];
 		}
 		$this->_callbacks[$method][] = $callback;
+	}
+
+	final public function get(string $key, bool $escape = true): string
+	{
+		if (! array_key_exists($key, $_GET)) {
+			return '';
+		} elseif ($escape) {
+			return htmlentities($_GET[$key]);
+		} else {
+			return $_GET[$key];
+		}
+	}
+
+	final public function post(string $key, bool $escape = true): string
+	{
+		if (! array_key_exists($key, $_POST)) {
+			return '';
+		} elseif ($escape) {
+			return htmlentities($_POST[$key]);
+		} else {
+			return $_POST[$key];
+		}
+	}
+
+	final public function file(string $key)
+	{
+		if ($this->hasFile($key)) {
+			return new UploadFile($key);
+		} else {
+			return null;
+		}
+	}
+
+	final public function hasFile(string $key): bool
+	{
+		return array_key_exists($key, $_FILES);
 	}
 
 	final public function redirect(URL $url, bool $permenant): void

@@ -64,7 +64,7 @@ final class Cookies implements \Iterator, \JSONSerializable
 		URL  $url      = null,
 		int  $expires  = 0,
 		bool $secure   = null,
-		bool $httponly = false
+		bool $httponly = true
 	)
 	{
 		if (is_null($url)) {
@@ -79,7 +79,7 @@ final class Cookies implements \Iterator, \JSONSerializable
 		$this->setPath($url->pathname);
 		$this->setSecure($secure);
 		$this->setHttpOnly($httponly);
-		$this->setDomain($url->origin);
+		$this->setDomain($url->hostname);
 
 		if (is_null(static::$_instance)) {
 			static::$_instance = $this;
@@ -262,11 +262,7 @@ final class Cookies implements \Iterator, \JSONSerializable
 
 	public function setDomain(string $domain): void
 	{
-		if (filter_var($domain, FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED)) {
-			$this->_domain = $domain;
-		} else {
-			throw new \InvalidArgumentException(sprintf('"%s" is not a valid domain', $domain));
-		}
+		$this->_domain = $domain;
 	}
 
 	public function setPath(string $path): void
