@@ -1,8 +1,8 @@
 <?php
 namespace Upload;
 
-use \shgysk8zer0\{PDO, User, API, Headers, Uploads, HTTPException};
-use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
+use \shgysk8zer0\PHPAPI\{PDO, User, API, Headers, Uploads, HTTPException};
+use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 use function \Functions\{upload_path};
 use const \Consts\{HOST};
 
@@ -10,17 +10,15 @@ require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php';
 
 try {
 	$api = new API('*');
-	$api->on('POST', function(): void
+	$api->on('POST', function(API $request): void
 	{
-		if (! array_key_exists('token', $_POST)) {
+		if (! $request->post->has('token')) {
 			throw new HTTPException('Missing token in request', HTTP::BAD_REQUEST);
 		} else {
-			$user = User::loadFromToken(PDO::load(), $_POST['token']);
+			$user = User::loadFromToken(PDO::load(), $request->post->get('token', false));
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', HTTP::UNAUTHORIZED);
-			}/* elseif (! $user->isAdmin()) {
-				throw new HTTPException('You do not have permissions for this action', HTTP::FORBIDDEN);
-			}*/ elseif (empty($_FILES)) {
+			} elseif (empty($_FILES)) {
 				throw new HTTPException('No file uploaded', HTTP::BAD_REQUEST);
 			} else {
 				$files = [];
@@ -33,18 +31,18 @@ try {
 						$files[$key] = new HTTPException("Error uploading {$file->name}");
 					}
 				}
-				Headers::set('Content-Type', 'application/json');
+				Headers::contentType('application/json');
 				echo json_encode($files);
 			}
 		}
 	});
 
-	$api->on('DELETE', function(): void
+	$api->on('DELETE', function(API $request): void
 	{
-		if (! array_key_exists('token', $_GET)) {
+		if (! $request->get->has('token')) {
 			throw new HTTPException('Missing token in request', HTTP::BAD_REQUEST);
 		} else {
-			$user = User::loadFromToken(PDO::load(), $_GET['token']);
+			$user = User::loadFromToken(PDO::load(), $request->get->get('token', false));
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', HTTP::UNAUTHORIZED);
 			} elseif (! $user->isAdmin()) {
@@ -57,6 +55,6 @@ try {
 	$api();
 } catch (HTTPException $e) {
 	Headers::status($e->getCode());
-	Headers::set('Content-Type', 'application/json');
+	Headers::contentType('application/json');
 	echo json_encode($e);
 }

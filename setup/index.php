@@ -2,7 +2,7 @@
 namespace Setup;
 require_once('../autoloader.php');
 
-use \shgysk8zer0\{PDO, DSN, Headers, HTTPException, API};
+use \shgysk8zer0\PHPAPI\{PDO, DSN, Headers, HTTPException, API};
 use const \Consts\{CREDS_FILE, SQL_FILE};
 use function \Functions\{log_exception};
 use \Throwable;

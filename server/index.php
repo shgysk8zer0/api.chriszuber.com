@@ -1,7 +1,7 @@
 <?php
 namespace Server;
-use \shgysk8zer0\{API, Headers, HTTPException, PDO, User};
-use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
+use \shgysk8zer0\PHPAPI\{API, Headers, HTTPException, PDO, User};
+use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php';
 
@@ -9,10 +9,10 @@ try {
 	$api = new API('*');
 	$api->on('GET', function(API $request): void
 	{
-		if ($request->url->searchParams->has('token')) {
-			$user = User::loadFromToken(PDO::load(), $request->url->searchParams->get('token'));
+		if ($request->get->has('token')) {
+			$user = User::loadFromToken(PDO::load(), $request->get->get('token', false));
 			if ($user->isAdmin()) {
-				Headers::set('Content-Type', 'application/json');
+				Headers::contentType('application/json');
 				echo json_encode($_SERVER);
 			} else {
 				throw new HTTPException('Access denied', HTTP::FORBIDDEN);
@@ -24,15 +24,6 @@ try {
 	$api();
 } catch(HTTPException $e) {
 	Headers::status($e->getCode());
-	Headers::set('Content-Type', 'application/json');
+	Headers::contentType('application/json');
 	echo json_encode($e);
-} catch (\Throwable $e) {
-	Headers::status(500);
-	Headers::set('Content-Type', 'application/json');
-	echo json_encode([
-		'message' => $e->getMessage(),
-		'file'    => $e->getFile(),
-		'line'    => $e->getLine(),
-		'trace'   => $e->getTrace(),
-	]);
 }

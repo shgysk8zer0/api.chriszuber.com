@@ -1,7 +1,7 @@
 <?php
 namespace Login;
 
-use \shgysk8zer0\{PDO, User, Headers, HTTPException, API};
+use \shgysk8zer0\PHPAPI\{PDO, User, Headers, HTTPException, API};
 
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
 
@@ -11,11 +11,14 @@ try {
 	$api->on('POST', function(API $api): void
 	{
 		if ($api->accept !== 'application/json') {
-			throw new HTTPException('Accept header must be "applicaiton/json"', Headers::NOT_ACCEPTABLE);
-		} else  if (isset($_POST['username'], $_POST['password'])) {
+			throw new HTTPException('Accept header must be "application/json"', Headers::NOT_ACCEPTABLE);
+		} else  if ($api->post->has('username', 'password')) {
 			$user = new User(PDO::load());
 
-			if ($user->login($_POST['username'], $_POST['password']) and filter_var($_POST['username'], FILTER_VALIDATE_EMAIL)) {
+			if (
+				$user->login($api->post->get('username', false), $api->post->get('password', false))
+				and API::isEmail($api->post->get('username', false))
+			) {
 				echo json_encode($user);
 			} else {
 				throw new HTTPException('Invalid username or password', Headers::UNAUTHORIZED);

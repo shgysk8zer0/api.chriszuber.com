@@ -1,8 +1,8 @@
 <?php
 namespace Upload;
 
-use \shgysk8zer0\{PDO, User, API, Headers, URL, HTTPException};
-use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
+use \shgysk8zer0\PHPAPI\{PDO, User, API, Headers, URL, HTTPException};
+use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 use const \Consts\{HOST};
 
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php';
@@ -11,16 +11,16 @@ try {
 	$api = new API('*');
 	$api->on('GET', function(API $request): void
 	{
-		if (! $request->url->searchParams->has('token')) {
+		if (! $request->get->has('token')) {
 			throw new HTTPException('Missing token in request', HTTP::BAD_REQUEST);
 		} else {
-			$user = User::loadFromToken(PDO::load(), $request->url->searchParams->get('token'));
+			$user = User::loadFromToken(PDO::load(), $request->get->get('token', false));
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', HTTP::UNAUTHORIZED);
 			} elseif (! $user->isAdmin()) {
 				throw new HTTPException('You do not have permissions for this action', HTTP::FORBIDDEN);
 			} else {
-				Headers::set('Content-Type', 'application/json');
+				Headers::contentType('application/json');
 				echo json_encode([
 					'$request' => $request,
 					'$_SERVER' => $_SERVER,
@@ -33,6 +33,6 @@ try {
 	$api();
 } catch (HTTPException $e) {
 	Headers::status($e->getCode());
-	Headers::set('Content-Type', 'application/json');
+	Headers::contentType('application/json');
 	echo json_encode($e);
 }

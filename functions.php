@@ -3,7 +3,7 @@
 namespace Functions;
 
 use const \Consts\{DEBUG, ERROR_LOG, UPLOADS_DIR};
-use \shgysk8zer0\{PDO, User, JSONFILE, Headers, HTTPException};
+use \shgysk8zer0\PHPAPI\{PDO, User, JSONFILE, Headers, HTTPException};
 use \StdClass;
 use \DateTime;
 use \Throwable;
