@@ -10,16 +10,16 @@ try {
 	$api = new API('*');
 	$api->on('GET', function(API $request): void
 	{
-		if (! $request->url->searchParams->has('token')) {
+		if (! $request->get->has('token')) {
 			throw new HTTPException('Missing token in request', HTTP::BAD_REQUEST);
 		} else {
-			$user = User::loadFromToken(PDO::load(), $request->url->searchParams->get('token'));
+			$user = User::loadFromToken(PDO::load(), $request->get->get('token', false));
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', HTTP::UNAUTHORIZED);
 			} elseif (! $user->isAdmin()) {
 				throw new HTTPException('You do not have permissions for this action', HTTP::FORBIDDEN);
 			} elseif (file_exists(ERROR_LOG)) {
-				Headers::set('Content-Type', 'application/json');
+				Headers::contentType('application/json');
 				echo json_encode(file(ERROR_LOG, FILE_SKIP_EMPTY_LINES));
 			} else {
 				throw new HTTException('Log File Not Found', HTTP::INTERNAL_SERVER_ERROR);
@@ -29,10 +29,10 @@ try {
 
 	$api->on('DELETE', function(API $request): void
 	{
-		if (! $request->url->searchParams->has('token')) {
+		if (! $request->get->has('token')) {
 			throw new HTTPException('Missing token in request', HTTP::BAD_REQUEST);
 		} else {
-			$user = User::loadFromToken(PDO::load(), $request->url->searchParams->get('token'));
+			$user = User::loadFromToken(PDO::load(), $request->get->get('token', false));
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', HTTP::UNAUTHORIZED);
 			} elseif (! $user->isAdmin()) {

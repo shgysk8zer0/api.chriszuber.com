@@ -2,7 +2,7 @@
 
 namespace shgysk8zer0;
 
-use \shgysk8zer0\Traits\{CORS};
+use \shgysk8zer0\Traits\{CORS, Validate};
 use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
 use \shgysk8zer0\{HTTPException, Headers, URL};
 use \Exception;
@@ -10,6 +10,7 @@ use \Exception;
 class API implements \JSONSerializable
 {
 	use CORS;
+	use Validate;
 
 	const DEFAULT_METHODS = [
 		'HEAD',

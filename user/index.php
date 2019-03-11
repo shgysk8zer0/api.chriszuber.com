@@ -9,11 +9,11 @@ try {
 
 	$api->on('GET', function(API $api): void
 	{
-		if (! array_key_exists('token', $_GET)) {
+		if (! $api->get->has('token')) {
 			throw new HTTPException('Missing token in request', Headers::BAD_REQUEST);
 		} else {
-			Headers::set('Content-Type', 'application/json');
-			$user = User::loadFromToken(PDO::load(), $_GET['token']);
+			Headers::contentType('application/json');
+			$user = User::loadFromToken(PDO::load(), $api->get->get('token', false));
 
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', Headers::UNAUTHORIZED);
@@ -27,11 +27,11 @@ try {
 	{
 		if ($api->accept !== 'application/json') {
 			throw new HTTPException('Accept header must be "application/json"', Headers::NOT_ACCEPTABLE);
-		} elseif (isset($_POST['username'], $_POST['password']) and filter_var($_POST['username'], FILTER_VALIDATE_EMAIL)) {
+		} elseif ($api->post->has('username', 'password') and API::isEmail($api->post('username', false))) {
 			$api->contentType = 'application/json';
 			$user = new User(PDO::load());
 
-			if ($user->create($_POST['username'], $_POST['password'])) {
+			if ($user->create($api->post('username', false), $api->post('password', false))) {
 				echo json_encode($user);
 			} else {
 				throw new HTTPException('Error registering user', Headers::UNAUTHORIZED);
@@ -43,11 +43,11 @@ try {
 
 	$api->on('DELETE', function(API $api): void
 	{
-		if (! array_key_exists('token', $_GET)) {
+		if (! $api->get->has('token')) {
 			throw new HTTPException('Missing token in request', Headers::BAD_REQUEST);
 		} else {
-			Headers::set('Content-Type', 'application/json');
-			$user = User::loadFromToken(PDO::load(), $_GET['token']);
+			Headers::contentType('application/json');
+			$user = User::loadFromToken(PDO::load(), $api->get('token', false));
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', Headers::UNAUTHORIZED);
 			} elseif ($user->delete()) {
@@ -61,6 +61,6 @@ try {
 	$api();
 } catch (HTTPException $e) {
 	Headers::status($e->getCode());
-	Headers::set('Content-Type', 'application/json');
+	Headers::contentType('application/json');
 	echo json_encode($e);
 }

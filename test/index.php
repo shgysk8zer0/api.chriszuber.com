@@ -29,6 +29,6 @@ try {
 	$api();
 } catch (HTTPException $e) {
 	Headers::status($e->getCode());
-	Headers::set('Content-Type', 'application/json');
+	Headers::contentType('application/json');
 	echo json_encode($e);
 }
