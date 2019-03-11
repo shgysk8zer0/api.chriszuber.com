@@ -13,7 +13,7 @@ try {
 	$api->on('GET', function(API $request): void
 	{
 		if (file_exists(OPEN_WEATHER_MAP)) {
-			define(__NAMESPACE__ . '\KEY', file_get_contents(OPEN_WEATHER_MAP));
+			define(__NAMESPACE__ . '\KEY', trim(file_get_contents(OPEN_WEATHER_MAP)));
 		} else {
 			throw new HTTPException('Missing OpenWeatherMap APPID', HTTP::INTERNAL_SERVER_ERROR);
 		}
