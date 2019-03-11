@@ -2,8 +2,8 @@
 namespace WebHook\GitHub;
 
 use const \Consts\{GITHUB_WEBHOOK};
-use \shgysk8zer0\{HTTPException, Headers, API};
-use \shgysk8zer0\WebHook\{GitHub};
+use \shgysk8zer0\PHPAPI\{HTTPException, Headers, API};
+use \shgysk8zer0\PHPAPI\WebHook\{GitHub};
 
 require_once(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'autoloader.php');
 try {

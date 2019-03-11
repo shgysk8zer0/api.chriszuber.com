@@ -1,8 +1,8 @@
 <?php
 namespace Upload;
 
-use \shgysk8zer0\{PDO, User, API, Headers, Uploads, HTTPException};
-use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
+use \shgysk8zer0\PHPAPI\{PDO, User, API, Headers, Uploads, HTTPException};
+use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 use function \Functions\{upload_path};
 use const \Consts\{HOST};
 

@@ -1,8 +1,8 @@
 <?php
 namespace Lint;
 
-use \shgysk8zer0\{Linter, Headers};
-use \shgysk8zer0\Abstracts\{HTTPSTatusCodes as HTTP};
+use \shgysk8zer0\PHPAPI\{Linter, Headers};
+use \shgysk8zer0\PHPAPI\Abstracts\{HTTPSTatusCodes as HTTP};
 use function \Functions\{is_cli};
 
 require_once('./autoloader.php');

@@ -1,7 +1,7 @@
 <?php
 namespace Log;
-use \shgysk8zer0\{PDO, User, Headers, HTTPException, API};
-use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
+use \shgysk8zer0\PHPAPI\{PDO, User, Headers, HTTPException, API};
+use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 use const \Consts\{ERROR_LOG};
 
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');

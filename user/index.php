@@ -1,6 +1,6 @@
 <?php
 namespace User;
-use \shgysk8zer0\{PDO, User, Headers, HTTPException, API};
+use \shgysk8zer0\PHPAPI\{PDO, User, Headers, HTTPException, API};
 
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
 

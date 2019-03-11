@@ -1,6 +1,6 @@
 <?php
 namespace Registration;
-use \shgysk8zer0\{Headers, URL, API, HTTPException};
+use \shgysk8zer0\PHPAPI\{Headers, URL, API, HTTPException};
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
 
 try {

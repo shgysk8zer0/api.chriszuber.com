@@ -1,7 +1,7 @@
 <?php
 namespace Server;
-use \shgysk8zer0\{API, Headers, HTTPException, PDO, User};
-use \shgysk8zer0\Abstracts\{HTTPStatusCodes as HTTP};
+use \shgysk8zer0\PHPAPI\{API, Headers, HTTPException, PDO, User};
+use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php';
 

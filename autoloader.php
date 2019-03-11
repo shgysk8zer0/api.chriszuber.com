@@ -13,7 +13,7 @@ use const \Consts\{
 	HOST
 };
 
-use \shgysk8zer0\{User, PDO, UploadFile};
+use \shgysk8zer0\PHPAPI\{User, PDO, UploadFile};
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'shims.php');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'consts.php');
