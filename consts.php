@@ -34,11 +34,11 @@ define(
 		'%s/%s',
 		HOST,
 		(DIRECTORY_SEPARATOR === '/')
-			? str_replace(__DIR__, $_SERVER['DOCUMENT_ROOT'], null)
-			: str_replace(
+			? ltrim(str_replace($_SERVER['DOCUMENT_ROOT'], null, __DIR__), '/')
+			: ltrim(str_replace(
 				DIRECTORY_SEPARATOR,
 				'/',
 				str_replace($_SERVER['DOCUMENT_ROOT'], null, __DIR__)
-			)
+			), '/')
 	)
 );
