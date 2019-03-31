@@ -1,13 +1,27 @@
 <?php
 
 namespace Functions;
-
 use const \Consts\{DEBUG, ERROR_LOG, UPLOADS_DIR};
-use \shgysk8zer0\PHPAPI\{PDO, User, JSONFILE, Headers, HTTPException};
+use \shgysk8zer0\PHPAPI\{PDO, User, JSONFILE, Headers, HTTPException, Request, URL};
 use \StdClass;
 use \DateTime;
 use \Throwable;
 use \ErrorException;
+
+function is_pwned(string $pwd): bool
+{
+	$hash   = strtoupper(sha1($pwd));
+	$prefix = substr($hash, 0, 5);
+	$rest   = substr($hash, 5);
+	$req    = new Request("https://api.pwnedpasswords.com/range/{$prefix}");
+	$resp   = $req->send();
+
+	if ($resp->ok) {
+		return strpos($resp->body, "{$rest}:") !== false;
+	} else {
+		return false;
+	}
+}
 
 function upload_path(): string
 {
