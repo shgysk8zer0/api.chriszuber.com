@@ -31,6 +31,7 @@ try {
 						$files[$key] = new HTTPException("Error uploading {$file->name}");
 					}
 				}
+				Headers::status(HTTP::CREATED);
 				Headers::contentType('application/json');
 				echo json_encode($files);
 			}
