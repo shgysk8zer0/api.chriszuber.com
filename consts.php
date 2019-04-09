@@ -28,17 +28,16 @@ define(__NAMESPACE__ . '\HOST', sprintf('%s://%s',
 	$_SERVER['HTTP_HOST'] ?? 'localhost'
 ));
 
-define(
-	__NAMESPACE__ . '\BASE_URI',
-	sprintf(
-		'%s/%s',
-		HOST,
+define(__NAMESPACE__ . '\BASE_PATH',
+	rtrim(
 		(DIRECTORY_SEPARATOR === '/')
-			? ltrim(str_replace($_SERVER['DOCUMENT_ROOT'], null, __DIR__), '/')
-			: ltrim(str_replace(
+			? '/' . trim(str_replace($_SERVER['DOCUMENT_ROOT'], null, __DIR__), '/')
+			: '/' . trim(str_replace(
 				DIRECTORY_SEPARATOR,
 				'/',
 				str_replace($_SERVER['DOCUMENT_ROOT'], null, __DIR__)
 			), '/')
-	)
+	,'/') . '/'
 );
+
+const BASE_URI = HOST . BASE_PATH;
