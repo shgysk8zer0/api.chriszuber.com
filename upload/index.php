@@ -18,22 +18,21 @@ try {
 			$user = User::loadFromToken(PDO::load(), $request->post->get('token', false));
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', HTTP::UNAUTHORIZED);
+			} elseif (! (array_key_exists('upload', $user->permissions) and $user->permissions['upload'])) {
+				throw new HTTPException('You do not have access', HTTP::FORBIDDEN);
 			} elseif (empty($_FILES)) {
 				throw new HTTPException('No file uploaded', HTTP::BAD_REQUEST);
 			} else {
-				$files = [];
 				$path = upload_path();
 
-				foreach (Uploads::getInstance() as $key => $file) {
-					if ($file->moveTo("{$path}{$file->hashFileName()}")) {
-						$files[$key] = $file;
-					} else {
-						$files[$key] = new HTTPException("Error uploading {$file->name}");
+				foreach ($request->files as $file) {
+					if (! $file->saveAs("{$path}{$file->md5}.{$file->ext}")) {
+						throw new HTTPException("Error uploading {$file->name}");
 					}
 				}
 				Headers::status(HTTP::CREATED);
 				Headers::contentType('application/json');
-				echo json_encode($files);
+				echo json_encode($request->files);
 			}
 		}
 	});
