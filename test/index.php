@@ -3,10 +3,11 @@ namespace Test;
 use \shgysk8zer0\PHPAPI\{API, Headers, HTTPException};
 use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 
-require_once  dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php';
 
 try {
-	$api = new API('*');
+	API::allowHeaders('Accept', 'Upgrade-Insecure-Requests');
+	$api = new API();
 
 	$api->on('GET', function(API $request): void
 	{

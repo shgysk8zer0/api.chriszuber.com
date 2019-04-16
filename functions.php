@@ -1,7 +1,7 @@
 <?php
 
 namespace Functions;
-use const \Consts\{DEBUG, ERROR_LOG, UPLOADS_DIR};
+use const \Consts\{DEBUG, ERROR_LOG, UPLOADS_DIR, BASE};
 use \shgysk8zer0\PHPAPI\{PDO, User, JSONFILE, Headers, HTTPException, Request, URL};
 use \StdClass;
 use \DateTime;
@@ -46,18 +46,20 @@ function is_cli(): bool
 
 function error_handler(int $errno, string $errstr, string $errfile, int $errline = 0): bool
 {
-	throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-	return true;
+	return log_exception(new ErrorException($errstr, 0, $errno, $errfile, $errline));
 }
 
 function exception_handler(Throwable $e)
 {
 	if ($e instanceof HTTPException) {
-		$e();
-	} else {
-		Headers::status(Headers::INTERNAL_SERVER_ERROR);
-		Headers::set('Content-Type', 'application/json');
 		log_exception($e);
+		Headers::status($e->getCode());
+		Headers::contentType('application/json');
+		exit(json_encode($e));
+	} else {
+		log_exception($e);
+		Headers::status(Headers::INTERNAL_SERVER_ERROR);
+		Headers::contentType('application/json');
 		exit(json_encode([
 			'error' => [
 				'message' => 'Internal Server Error',
@@ -69,14 +71,40 @@ function exception_handler(Throwable $e)
 
 function log_exception(Throwable $e): bool
 {
-	$dtime = new DateTime();
-	return file_put_contents(ERROR_LOG, sprintf(
-		'[%s %d]: %s "%s" on %s:%d' . PHP_EOL,
-		get_class($e),
-		$e instanceof ErrorException ? $e->getSeverity() : $e->getCode(),
-		$dtime->format(DateTime::W3C),
-		$e->getMessage(),
-		$e->getFile(),
-		$e->getLine()
-	), FILE_APPEND | LOCK_EX);
+	static $stm = null;
+
+	if (is_null($stm)) {
+		$pdo = PDO::load();
+		$stm = $pdo->prepare('INSERT INTO `logs` (
+			`type`,
+			`message`,
+			`file`,
+			`line`,
+			`code`,
+			`remoteIP`,
+			`url`
+		) VALUES (
+			:type,
+			:message,
+			:file,
+			:line,
+			:code,
+			:ip,
+			:url
+		);');
+	}
+
+	$url = URL::getRequestUrl();
+	unset($url->password);
+	$code = $e->getCode();
+
+	return $stm->execute([
+		':type'    => get_class($e),
+		':message' => $e->getMessage(),
+		':file'    => str_replace(BASE, null, $e->getFile()),
+		':line'    => $e->getLine(),
+		':code'    => is_int($code) ? $code : 0,
+		':ip'      => $_SERVER['REMOTE_ADDR'] ?? null,
+		':url'     => $url,
+	]);
 }
