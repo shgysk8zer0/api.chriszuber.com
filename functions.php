@@ -95,14 +95,15 @@ function log_exception(Throwable $e): bool
 	}
 
 	$url = URL::getRequestUrl();
-	unset($url->search, $url->password);
+	unset($url->password);
+	$code = $e->getCode();
 
 	return $stm->execute([
 		':type'    => get_class($e),
 		':message' => $e->getMessage(),
 		':file'    => str_replace(BASE, null, $e->getFile()),
 		':line'    => $e->getLine(),
-		':code'    => $e->getCode(),
+		':code'    => is_int($code) ? $code : 0,
 		':ip'      => $_SERVER['REMOTE_ADDR'] ?? null,
 		':url'     => $url,
 	]);
