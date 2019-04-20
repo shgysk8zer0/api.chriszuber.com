@@ -95,12 +95,12 @@ function log_exception(Throwable $e): bool
 	}
 
 	$url = URL::getRequestUrl();
-	unset($url->password);
+	unset($url->password, $url->search);
 	$code = $e->getCode();
 
 	return $stm->execute([
 		':type'    => get_class($e),
-		':message' => $e->getMessage(),
+		':message' => substr($e->getMessage(), 0, 255),
 		':file'    => str_replace(BASE, null, $e->getFile()),
 		':line'    => $e->getLine(),
 		':code'    => is_int($code) ? $code : 0,
