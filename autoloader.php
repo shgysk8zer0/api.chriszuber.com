@@ -33,7 +33,7 @@ try {
 		(new \shgysk8zer0\RandomString(30, true, true, true, true))->saveAs(HMAC_FILE);
 	}
 
-	User::setKey(file_get_contents(HMAC_FILE));
+	User::setKey(trim(file_get_contents(HMAC_FILE)));
 	UploadFile::setHost(HOST);
 
 	if (FILE_EXISTS(CREDS_FILE)) {
