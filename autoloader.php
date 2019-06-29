@@ -10,10 +10,11 @@ use const \Consts\{
 	EXCEPTION_HANDLER,
 	HMAC_FILE,
 	CREDS_FILE,
+	CSP_ALLOWED_HEADERS,
 	HOST
 };
 
-use \shgysk8zer0\PHPAPI\{User, PDO, UploadFile};
+use \shgysk8zer0\PHPAPI\{API, User, PDO, UploadFile};
 use \shgysk8zer0\PHPAPI\Schema\{Thing};
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'shims.php');
@@ -41,6 +42,7 @@ try {
 	}
 
 	Thing::setPDO(PDO::load());
+	API::allowHeaders(...CSP_ALLOWED_HEADERS);
 
 } catch (\Throwable $e) {
 	print_r($e);
