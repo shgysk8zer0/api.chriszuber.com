@@ -23,6 +23,12 @@ const INCLUDE_PATH      = [
 	__DIR__,
 ];
 
+const CSP_ALLOWED_HEADERS = [
+	'Accept',
+	'Content-Type',
+	'Upgrade-Insecure-Requests',
+];
+
 define(__NAMESPACE__ . '\HOST', sprintf('%s://%s',
 	(array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS'])) ? 'https' : 'http',
 	$_SERVER['HTTP_HOST'] ?? 'localhost'
