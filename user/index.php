@@ -3,6 +3,7 @@ namespace User;
 use \shgysk8zer0\PHPAPI\{PDO, User, Headers, HTTPException, API};
 use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 use function \Functions\{is_pwned};
+use \Throwable;
 
 require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'autoloader.php');
 
@@ -27,23 +28,16 @@ try {
 
 	$api->on('POST', function(API $api): void
 	{
-		if ($api->accept !== 'application/json') {
-			throw new HTTPException('Accept header must be "application/json"', Headers::NOT_ACCEPTABLE);
-		} elseif ($api->post->has('username', 'password') and API::isEmail($api->post('username', false))) {
-			$api->contentType = 'application/json';
-			if (is_pwned($api->post->get('password', false))) {
-				throw new HTTPException('Password has previously been found in data breach', HTTP::FORBIDDEN);
-			}
+		try {
 			$user = new User(PDO::load());
-
-			if ($user->create($api->post('username', false), $api->post('password', false))) {
+			if ($user->create($api->post)) {
 				Headers::status(HTTP::CREATED);
 				echo json_encode($user);
 			} else {
 				throw new HTTPException('Error registering user', HTTP::UNAUTHORIZED);
 			}
-		} else {
-			throw new HTTPException('Missing or invalid username or password fields', HTTP::BAD_REQUEST);
+		} catch (HTTPEXception $e) {
+			throw $e;
 		}
 	});
 
@@ -66,7 +60,5 @@ try {
 
 	$api();
 } catch (HTTPException $e) {
-	Headers::status($e->getCode());
-	Headers::contentType('application/json');
-	echo json_encode($e);
+	throw $e;
 }
