@@ -47,21 +47,3 @@ define(__NAMESPACE__ . '\BASE_PATH',
 );
 
 const BASE_URI = HOST . BASE_PATH;
-
-const PERMISSIONS = [
-	'debug',
-	'createUpload',
-	'deleteUpload',
-	'createEvent',
-	'updateEvent',
-	'deleteEvent',
-	'createUser',
-	'updateUser',
-	'deleteUser',
-	'deleteUser',
-	'createComment',
-	'deleteComment',
-	'createPost',
-	'updatePost',
-	'deletePost',
-];
