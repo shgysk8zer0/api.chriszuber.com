@@ -29,14 +29,16 @@ try {
 	{
 		if ($api->accept !== 'application/json') {
 			throw new HTTPException('Accept header must be "application/json"', Headers::NOT_ACCEPTABLE);
-		} elseif ($api->post->has('username', 'password') and API::isEmail($api->post('username', false))) {
-			$api->contentType = 'application/json';
+		} elseif ($api->post->has('username', 'password') and filter_var($api->post('username', false, ''), FILTER_VALIDATE_EMAIL) {
+			Headers::contentType('application/json');
+
 			if (is_pwned($api->post->get('password', false))) {
 				throw new HTTPException('Password has previously been found in data breach', HTTP::FORBIDDEN);
 			}
+
 			$user = new User(PDO::load());
 
-			if ($user->create($api->post('username', false), $api->post('password', false))) {
+			if ($user->create($api->post)) {
 				Headers::status(HTTP::CREATED);
 				echo json_encode($user);
 			} else {
