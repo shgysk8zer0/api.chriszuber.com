@@ -14,26 +14,36 @@ try {
 
 	$api->on('GET', function(API $req): void
 	{
-		Event::setPDO(PDO::load());
-		Headers::contentType(Event::CONTENT_TYPE);
+		if ($req->get->has('uuid')) {
+			$event = new Event();
+			if ($event->getByUuid($req->get->get('uuid'))) {
+				Headers::contentType(Event::CONTENT_TYPE);
+				echo json_encode($event);
+			} else {
+				throw new HTTPException('Not found', HTTP::NOT_FOUND);
+			}
+		} else {
+			Event::setPDO(PDO::load());
+			Headers::contentType(Event::CONTENT_TYPE);
 
-		try {
-			$start = new DateTime($req->get->get('start', false, null));
-		} catch (Throwable $e) {
-			throw new HTTPException(
-				sprintf('"%s" is not a valid date format', $req->get->get('start')),
-				HTTP::BAD_REQUEST
+			try {
+				$start = new DateTime($req->get->get('start', false, null));
+			} catch (Throwable $e) {
+				throw new HTTPException(
+					sprintf('"%s" is not a valid date format', $req->get->get('start')),
+					HTTP::BAD_REQUEST
+				);
+			}
+
+			$events = Event::searchDateRange(
+				$start,
+				$req->get->get('range', false, '1 month'),
+				$req->get->get('limit', false, 50),
+				$req->get->get('page', false, 1)
 			);
+
+			echo json_encode($events, JSON_PRETTY_PRINT);
 		}
-
-		$events = Event::searchDateRange(
-			$start,
-			$req->get->get('range', false, '1 month'),
-			$req->get->get('limit', false, 50),
-			$req->get->get('page', false, 1)
-		);
-
-		echo json_encode($events, JSON_PRETTY_PRINT);
 	});
 
 	$api();

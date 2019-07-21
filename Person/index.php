@@ -1,5 +1,5 @@
 <?php
-namespace Organization;
+namespace Person;
 use \shgysk8zer0\PHPAPI\{API, Headers, HTTPException, PDO};
 use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 use \shgysk8zer0\PHPAPI\Schema\{Person};
@@ -11,6 +11,16 @@ try {
 
 	$api->on('GET', function(API $request)
 	{
+		if ($request->get->has('uuid')) {
+			$person = new Person();
+			if ($person->getByUuid($request->get->get('uuid'))) {
+				Headers::contentType(Person::CONTENT_TYPE);
+				exit(json_encode($person));
+			} else {
+				throw new HTTPException('Not found', HTTP::NOT_FOUND);
+			}
+		}
+
 		throw new HTTPException('Person search is currently being built', HTTP::NOT_IMPLEMENTED);
 		$results = [];
 

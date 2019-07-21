@@ -12,13 +12,20 @@ try {
 	$api->on('GET', function(API $request)
 	{
 		$results = [];
-
-		if ($request->get->has('name')) {
-			$results = Organization::searchByName(
-				$request->get->get('name', false),
-				$request->get->get('limit', false, 10),
-				$request->get->get('offset', false, 0)
-			);
+		if ($request->get->has('uuid')) {
+			$org = new Organization();
+			if ($org->getByUuid($request->get->get('uuid'))) {
+				Headers::contentType(Organization::CONTENT_TYPE);
+				exit(json_encode($org));
+			} else {
+				throw new HTTPException('Not found', HTTP::NOT_FOUND);
+			}
+		} elseif ($request->get->has('name')) {
+				$results = Organization::searchByName(
+					$request->get->get('name', false),
+					$request->get->get('limit', false, 10),
+					$request->get->get('offset', false, 0)
+				);
 		} else {
 			throw new HTTPException('No search paramaters given', HTTP::BAD_REQUEST);
 		}
@@ -27,7 +34,7 @@ try {
 			throw new HTTPException('No matches found', HTTP::NOT_FOUND);
 		}
 
-		Headers::contentType('application/json');
+		Headers::contentType(Organization::CONTENT_TYPE);
 		echo json_encode($results);
 	});
 
