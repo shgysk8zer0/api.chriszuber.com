@@ -27,9 +27,10 @@ try {
 
 	$api->on('POST', function(API $api): void
 	{
-		if ($api->accept !== 'application/json') {
-			throw new HTTPException('Accept header must be "application/json"', Headers::NOT_ACCEPTABLE);
-		} elseif ($api->post->has('username', 'password') and filter_var($api->post('username', false, ''), FILTER_VALIDATE_EMAIL) {
+		if (
+			$api->post->has('username', 'password', 'givenName', 'familyName')
+			and filter_var($api->post->get('username', false, ''), FILTER_VALIDATE_EMAIL)
+		) {
 			Headers::contentType('application/json');
 
 			if (is_pwned($api->post->get('password', false))) {
