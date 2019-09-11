@@ -11,7 +11,8 @@ use const \Consts\{
 	HMAC_FILE,
 	CREDS_FILE,
 	CSP_ALLOWED_HEADERS,
-	HOST
+	HOST,
+	TOKEN_EXPIRES,
 };
 
 use \shgysk8zer0\PHPAPI\{API, User, PDO, UploadFile};
@@ -35,6 +36,7 @@ try {
 	}
 
 	User::setKey(file_get_contents(HMAC_FILE));
+	User::setExpires(TOKEN_EXPIRES['value'], TOKEN_EXPIRES['units']);
 	UploadFile::setHost(HOST);
 
 	if (FILE_EXISTS(CREDS_FILE)) {
