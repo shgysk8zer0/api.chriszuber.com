@@ -29,6 +29,11 @@ const CSP_ALLOWED_HEADERS = [
 	'Upgrade-Insecure-Requests',
 ];
 
+const TOKEN_EXPIRES = [
+	'value' => 1,
+	'units' => 'month',
+];
+
 define(__NAMESPACE__ . '\HOST', sprintf('%s://%s',
 	(array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS'])) ? 'https' : 'http',
 	$_SERVER['HTTP_HOST'] ?? 'localhost'
