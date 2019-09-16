@@ -231,6 +231,42 @@ try {
 		}
 	}
 
+	function get_by_location(
+		PDO $pdo,
+		string $uuid,
+		?DateTimeImmutable $start = null,
+		?Duration          $date_range = null,
+		int                $page       = 1,
+		int                $limit      = 30
+	): array
+	{
+		$sql = SELECT . '
+		WHERE `Place`.`identifier` = :uuid
+		AND `Event`.`startDate` BETWEEN TIMESTAMP(COALESCE(:start, CURRENT_TIMESTAMP)) AND TIMESTAMP(COALESCE(:end, ADDDATE(CURDATE(), INTERVAL 1 MONTH)))
+		' . sprintf('LIMIT %d, %d;', ($page - 1) * $limit, $limit);
+
+		if (is_null($start)) {
+			$start = new DateTimeImmutable();
+		}
+
+		if (is_null($date_range)) {
+			$duration = new Duration(1, 'month');
+		}
+
+		$stm = $pdo->prepare($sql);
+
+		$stm->execute([
+			':uuid'   => $uuid,
+			':start'  => $start->format(DateTime::W3C),
+			':end'    => $start->modify("{$date_range}")->format(DateTime::W3C),
+		]);
+
+		return array_map(function(object $event): object
+		{
+			return json_decode($event->json);
+		}, $stm->fetchAll() ?? []);
+	}
+
 	$api = new API('*');
 
 	$api->on('GET', function(API $req): void
@@ -242,6 +278,17 @@ try {
 				new GeoCoordinates($req->get->get('latitude'), $req->get->get('longitude')),
 				new DateTimeImmutable($req->get->get('date', false, 'now')),
 				new Distance($req->get->get('radius', false, 0.3), 'm'),
+				new Duration($req->get->get('days', false, 30), 'days'),
+				$req->get->get('page', false, 1),
+				$req->get->get('results', false, 30)
+			);
+			echo json_encode($results);
+		} elseif ($req->get->has('place')) {
+			Headers::contentType('application/json');
+			$results = get_by_location(
+				PDO::load(),
+				$req->get->get('place'),
+				$req->get->has('date') ? new DateTimeImmutable($req->get->get('date')) : null,
 				new Duration($req->get->get('days', false, 30), 'days'),
 				$req->get->get('page', false, 1),
 				$req->get->get('results', false, 30)
