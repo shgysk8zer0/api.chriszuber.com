@@ -1,6 +1,6 @@
 <?php
 namespace Event;
-use \shgysk8zer0\PHPAPI\{API, PDO, Headers, HTTPException, User};
+use \shgysk8zer0\PHPAPI\{API, PDO, Headers, HTTPException, User, UUID};
 use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 use \DateTime;
 use \DateTimeImmutable;
@@ -261,9 +261,63 @@ try {
 		}
 	});
 
-	$api->on('POST', function(): void
+	$api->on('POST', function(API $req): void
 	{
-		throw new HTTPException('Not yet implemented', HTTP::NOT_IMPLEMENTED);
+		if ($req->post->has('token', 'name', 'startDate', 'endDate', 'location') or $req->post->has('token', 'uuid')) {
+			$pdo = PDO::load();
+			$user = User::loadFromToken($pdo, $req->post->get('token', false));
+
+			if (! $user->loggedIn) {
+				throw new HTTPException('User data expired or invalid', HTTP::UNAUTHORIZED);
+			} elseif (! $user->can('createEvent')) {
+				throw new HTTPException('You do not have permission to create events', HTTP::UNAUTHORIZED);
+			} else {
+				$pdo->beginTransaction();
+				$stm = $pdo->prepare('INSERT INTO `Event` (
+					`identifier`,
+					`name`,
+					`description`,
+					`startDate`,
+					`endDate`,
+					`location`,
+					`image`,
+					`organizer`
+				) VALUES (
+					:uuid,
+					:name,
+					:description,
+					TIMESTAMP(:startDate),
+					TIMESTAMP(:endDate),
+					:location,
+					:image,
+					:organizer
+				) ON DUPLICATE KEY UPDATE
+					`name` = :name,
+					`description` = COALESCE(:description, `description`),
+					`startDate`   = TIMESTAMP(COALESCE(:startDate, `startDate`)),
+					`endDate`     = TIMESTAMP(COALESCE(:endDate, `endDate`)),
+					`location`    = COALESCE(:location, `location`),
+					`image`       = COALESCE(:image, `image`);');
+
+				if ($stm->execute([
+					':uuid'        => $req->post->has('uuid') ? $req->post->get('uuid') : new UUID(),
+					':name'        => $req->post->get('name'),
+					':description' => $req->post->get('description'),
+					':startDate'   => $req->post->get('startDate'),
+					':endDate'     => $req->post->get('endDate'),
+					':location'    => $req->post->get('location'),
+					':image'       => $req->post->get('image'),
+					':organizer'   => $user->id,
+				]) and (intval($pdo->lastInsertId()) !== 0 or $stm->rowCount() === 1)) {
+					Headers::status(HTTP::CREATED);
+					exit();
+				} else {
+					throw new HTTPException('Error creating or updating event', HTTP::INTERNAL_SERVER_ERROR);
+				}
+			}
+		} else {
+			throw new HTTPException('Missing required fields', HTTP::BAD_REQUEST);
+		}
 	});
 
 	$api->on('DELETE', function(API $req): void
