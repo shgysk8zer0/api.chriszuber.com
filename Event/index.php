@@ -272,7 +272,6 @@ try {
 			} elseif (! $user->can('createEvent')) {
 				throw new HTTPException('You do not have permission to create events', HTTP::UNAUTHORIZED);
 			} else {
-				$pdo->beginTransaction();
 				$stm = $pdo->prepare('INSERT INTO `Event` (
 					`identifier`,
 					`name`,
