@@ -18,6 +18,7 @@ const SELECT = 'SELECT JSON_OBJECT(
 	"description", `Event`.`description`,
 	"startDate", DATE_FORMAT(`Event`.`startDate`, "%Y-%m-%dT%T"),
 	"endDate", DATE_FORMAT(`Event`.`endDate`, "%Y-%m-%dT%T"),
+	"url", `Event`.`url`,
 	"location", JSON_OBJECT(
 		"@context", "https://schema.org",
 		"@type", "Place",
@@ -325,6 +326,7 @@ try {
 					`description`,
 					`startDate`,
 					`endDate`,
+					`url`,
 					`location`,
 					`image`,
 					`organizer`
@@ -334,6 +336,7 @@ try {
 					:description,
 					TIMESTAMP(:startDate),
 					TIMESTAMP(:endDate),
+					:url,
 					:location,
 					:image,
 					:organizer
@@ -342,6 +345,7 @@ try {
 					`description` = COALESCE(:description, `description`),
 					`startDate`   = TIMESTAMP(COALESCE(:startDate, `startDate`)),
 					`endDate`     = TIMESTAMP(COALESCE(:endDate, `endDate`)),
+					`url`         = COALESCE(:url, `url`),
 					`location`    = COALESCE(:location, `location`),
 					`image`       = COALESCE(:image, `image`);');
 
@@ -351,6 +355,7 @@ try {
 					':description' => $req->post->get('description'),
 					':startDate'   => $req->post->get('startDate'),
 					':endDate'     => $req->post->get('endDate'),
+					':url'         => $req->post->get('url'),
 					':location'    => $req->post->get('location'),
 					':image'       => $req->post->get('image'),
 					':organizer'   => $user->id,
