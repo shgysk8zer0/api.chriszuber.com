@@ -1,6 +1,7 @@
 <?php
 namespace Place;
 use \shgysk8zer0\PHPAPI\{API, PDO, Headers, HTTPException, User, UUID};
+use \shgysk8zer0\PHPAPI\Interfaces\{InputData};
 use \shgysk8zer0\PHPAPI\Abstracts\{HTTPStatusCodes as HTTP};
 use \DateTime;
 use \DateTimeImmutable;
@@ -32,12 +33,172 @@ const SELECT = 'SELECT JSON_OBJECT(
 		"longitude", `GeoCoordinates`.`longitude`,
 		"latitude", `GeoCoordinates`.`latitude`,
 		"elevation", `GeoCoordinates`.`elevation`
+	),
+	"image", JSON_OBJECT(
+		"@type", "ImageObject",
+		"identifier", `ImageObject`.`identifier`,
+		"url", `ImageObject`.`url`,
+		"width", `ImageObject`.`width`,
+		"height", `ImageObject`.`height`,
+		"encodingFormat", `ImageObject`.`encodingFormat`,
+		"contentSize", `ImageObject`.`contentSize`
 	)
 ) AS `json`
 FROM `Place`
 LEFT OUTER JOIN `PostalAddress` ON `Place`.`address` = `PostalAddress`.`id`
 LEFT OUTER JOIN `GeoCoordinates` ON `Place`.`geo` = `GeoCoordinates`.`id`
 LEFT OUTER JOIN `ImageObject` ON `Place`.`image` = `ImageObject`.`id`';
+
+function create_place(PDO $pdo, InputData $input): int
+{
+	$stm = $pdo->prepare('INSERT INTO `Place` (
+		`identifier`,
+		`name`,
+		`description`,
+		`geo`,
+		`address`,
+		`image`,
+		`publicAccess`
+	) VALUES (
+		:uuid,
+		:name,
+		:description,
+		:geo,
+		:address,
+		:image,
+		:publicAccess
+	) ON DUPLICATE KEY UPDATE
+		`name`         = COALESCE(:name, `name`),
+		`description`  = COALESCE(:description, `description`),
+		`address`      = COALESCE(:address, `address`),
+		`geo`          = COALESCE(:geo, `geo`),
+		`image`        = COALESCE(:image, `image`),
+		`publicAccess` = COALESCE(:publicAccess, `publicAccess`);');
+
+	$uuid = $input->has('identifier') ? $input->get('identifier') : new UUID();
+	$params = [
+		':uuid'         => $uuid,
+		':name'         => $input->get('name'),
+		':description'  => $input->get('description'),
+		':geo'          => create_geo_coordinates($pdo, $input->get('geo')),
+		':address'      => create_postal_address($pdo, $input->get('address')),
+		':image'        => create_image_object($pdo, $input->get('image')),
+		':publicAccess' => $input->get('publicAccess', false, true),
+	];
+
+	if ($stm->execute($params)) {
+		$id = $pdo->lastInsertId();
+		Headers::contentType('application/json');
+		echo json_encode(get_place($pdo, $uuid));
+		return $id;
+	} elseif ($data->has('identifier') and $stm->rowCount() === 1) {
+		// TODO Get affected row ID
+	} else {
+		return 0;
+	}
+}
+
+function create_postal_address(PDO $pdo, InputData $input): int
+{
+	$stm = $pdo->prepare('INSERT INTO `PostalAddress` (
+		`identifier`,
+		`streetAddress`,
+		`postOfficeBoxNumber`,
+		`addressLocality`,
+		`addressRegion`,
+		`addressCountry`,
+		`postalCode`
+	) VALUES (
+		:uuid,
+		:streetAddress,
+		:postOfficeBoxNumber,
+		:addressLocality,
+		:addressRegion,
+		:addressCountry,
+		:postalCode
+	);');
+
+	$uuid = $input->has('uuid') ? $input->get('identifier') : new UUID();
+
+	if ($stm->execute([
+		':uuid'                => $uuid,
+		':streetAddress'       => $input->get('streetAddress'),
+		':postOfficeBoxNumber' => $input->get('postOfficeBoxNumber'),
+		':addressLocality'     => $input->get('addressLocality'),
+		':addressRegion'       => $input->get('addressRegion'),
+		':addressCountry'      => $input->get('addressCountry', true, 'US'),
+		':postalCode'          => $input->get('postalCode'),
+	])) {
+		return $pdo->lastInsertId();
+	} else {
+		return 0;
+	}
+}
+
+function create_geo_coordinates(PDO $pdo, InputData $input): int
+{
+	$stm = $pdo->prepare('INSERT INTO `GeoCoordinates` (
+		`identifier`,
+		`name`,
+		`longitude`,
+		`latitude`,
+		`elevation`
+	) VALUES (
+		:uuid,
+		:name,
+		:longitude,
+		:latitude,
+		:elevation
+	);');
+
+	$uuid = $input->has('uuid') ? $input->get('identifier') : new UUID();
+
+	if ($stm->execute([
+		':uuid'      => $uuid,
+		':name'      => $input->get('name'),
+		':longitude' => $input->get('longitude'),
+		':latitude'  => $input->get('latitude'),
+		':elevation' => $input->get('elevation'),
+	])) {
+		return $pdo->lastInsertId();
+	} else {
+		return 0;
+	}
+}
+
+function create_image_object(PDO $pdo, InputData $input): int
+{
+	$stm = $pdo->prepare('INSERT INTO `ImageObject` (
+		`identifier`,
+		`url`,
+		`height`,
+		`width`,
+		`encodingFormat`,
+		`contentSize`
+	) VALUES (
+		:uuid,
+		:url,
+		:height,
+		:width,
+		:encodingFormat,
+		:contentSize
+	);');
+
+	$uuid = $input->has('uuid') ? $input->get('identifier') : new UUID();
+
+	if ($stm->execute([
+		':uuid'           => $uuid,
+		':url'            => $input->get('url'),
+		':height'         => $input->get('height'),
+		':width'          => $input->get('width'),
+		':encodingFormat' => $input->get('encodingFormat'),
+		':contentSize'    => $input->get('contentSize'),
+	])) {
+		return $pdo->lastInsertId();
+	} else {
+		return 0;
+	}
+}
 
 final class Distance
 {
@@ -221,44 +382,16 @@ try {
 			if (! $user->loggedIn) {
 				throw new HTTPException('User data expired or invalid', HTTP::UNAUTHORIZED);
 			} elseif (! $user->can('createPlace')) {
-				throw new HTTPException('You do not have permission to create Places', HTTP::UNAUTHORIZED);
+				throw new HTTPException('You do not have permission for that', HTTP::FORBIDDEN);
 			} else {
-				$stm = $pdo->prepare('INSERT INTO `Place` (
-					`identifier`,
-					`name`,
-					`description`,
-					`address`,
-					`geo`,
-					`image`,
-					`publicAccess`
-				) VALUES (
-					:uuid,
-					:name,
-					:description,
-					:address,
-					:geo,
-					:image,
-					:publicAccess
-				) ON DUPLICATE KEY UPDATE
-					`name`         = COALESCE(:name, `name`),
-					`description`  = COALESCE(:description, `description`),
-					`address`      = COALESCE(:address, `address`),
-					`geo`          = COALESCE(:geo, `geo`),
-					`image`        = COALESCE(:image, `image`),
-					`publicAccess` = COALESCE(:publicAccess, `publicAccess`);');
+				$pdo = PDO::load();
+				$pdo->beginTransaction();
 
-				if ($stm->execute([
-					':uuid'           => $req->post->has('uuid') ? $req->post->get('uuid') : new UUID(),
-					':name'           => $req->post->get('name'),
-					':description'    => $req->post->get('description'),
-					':address'        => $req->post->get('address'),
-					':geo'            => $req->post->get('geo'),
-					':image'          => $req->post->get('image'),
-					':publicAccess'   => $req->post->get('publicAccess'),
-				]) and (intval($pdo->lastInsertId()) !== 0 or $stm->rowCount() === 1)) {
+				if ($id = create_place(PDO::load(), $req->post)) {
 					Headers::status(HTTP::CREATED);
-					exit();
+					$pdo->commit();
 				} else {
+					$pdo->rollBack();
 					throw new HTTPException('Error creating or updating Place', HTTP::INTERNAL_SERVER_ERROR);
 				}
 			}
