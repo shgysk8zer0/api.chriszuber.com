@@ -5,16 +5,18 @@ use \shgysk8zer0\PHPAPI\{Linter, Headers};
 use \shgysk8zer0\PHPAPI\Abstracts\{HTTPSTatusCodes as HTTP};
 use function \Functions\{is_cli};
 
-require_once('./autoloader.php');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'autoloader.php');
 
 if (is_cli()) {
 	$linter = new Linter();
 	$linter->ignoreDirs('./.git', './data', './logs');
 	$linter->scanExts('php');
 
-	if (! $linter->scan(__DIR__)) {
+	if ($linter->scan(__DIR__)) {
+		exit(0);
+	} else {
 		exit(1);
 	}
 } else {
-	Headers::status(HTTP::NOT_FOUND);
+	Headers::status(HTTP::FORBIDDEN);
 }
