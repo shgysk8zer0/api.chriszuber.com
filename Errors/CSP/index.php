@@ -30,11 +30,9 @@ try {
 				`remoteAddress`,
 				DATE_FORMAT(`dateTime`, "%Y-%m-%dT%T") AS `dateTime`
 			FROM `CSPErrors`;');
-
-			if ($stm->execute() and $errs = $stm->fetchAll()) {
-				Headers::contentType('application/json');
-				echo json_encode($errs);
-			}
+			$stm->execute();
+			Headers::contentType('application/json');
+			echo json_encode($stm->fetchAll() ?? []);
 		}
 	});
 
