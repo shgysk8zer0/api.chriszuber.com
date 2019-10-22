@@ -41,7 +41,7 @@ try {
 				$datetime        = new DateTime($entry->datetime);
 				$entry->datetime = $datetime->format(DateTime::W3C);
 				return $entry;
-			}, $stm->fetchAll());
+			}, $stm->fetchAll() ?? []);
 
 			Headers::contentType('application/json');
 			echo json_encode($logs);
