@@ -38,8 +38,8 @@ try {
 
 	$api->on('POST', function(API $req): void
 	{
-		if ($req->post->has('csp-report')) {
-			$report = $req->post->get('csp-report');
+		if ($req->post->has('document-uri', 'violated-directive')) {
+			$report = $req->post;
 			$pdo = PDO::load();
 			$stm = $pdo->prepare('INSERT INTO `CSPErrors` (
 				`uuid`,
