@@ -41,7 +41,7 @@ function dnt(): bool
 
 function is_cli(): bool
 {
-	return in_array(PHP_SAPI, ['cli']);
+	return in_array(PHP_SAPI, ['cli', 'cli-server']);
 }
 
 function error_handler(int $errno, string $errstr, string $errfile, int $errline = 0): bool
@@ -52,12 +52,12 @@ function error_handler(int $errno, string $errstr, string $errfile, int $errline
 function exception_handler(Throwable $e)
 {
 	if ($e instanceof HTTPException) {
-		log_exception($e);
+		log_exception($e) or die('Error logging excception');
 		Headers::status($e->getCode());
 		Headers::contentType('application/json');
 		exit(json_encode($e));
 	} else {
-		log_exception($e);
+		log_exception($e) or die('Error logging exception');
 		Headers::status(Headers::INTERNAL_SERVER_ERROR);
 		Headers::contentType('application/json');
 		exit(json_encode([
@@ -71,6 +71,27 @@ function exception_handler(Throwable $e)
 
 function log_exception(Throwable $e): bool
 {
+	// header('Content-Type: application/json');
+	// http_response_code(500);
+	// exit(json_encode(['error' => [
+	// 	'message' => $e->getMessage(),
+	// 	'file'    => $e->getFile(),
+	// 	'line'    => $e->getLine(),
+	// 	'trace'   => $e->getTrace(),
+	// ]]));
+	return error_log(
+		sprintf(
+			'[%s %d] "%s" on %s:%d at %s' . PHP_EOL,
+			get_class($e),
+			$e->getCode(),
+			$e->getMessage(),
+			$e->getFile(),
+			$e->getLine(),
+			date(DateTime::W3C)
+		),
+		\Autoloader\CONFIG['error_log']['message_type'],
+		\Autoloader\CONFIG['error_log']['destination']
+	);
 	static $stm = null;
 
 	if (is_null($stm)) {

@@ -12,27 +12,6 @@ const GITHUB_WEBHOOK    = DATA_DIR . 'github.json';
 const SQL_FILE          = DATA_DIR . 'db.sql';
 const ERROR_LOG         = LOGS_DIR . 'errors.log';
 const OPEN_WEATHER_MAP  = DATA_DIR . 'OpenWeatherMap.key';
-const TIMEZONE          = 'America/Los_Angeles';
-const EXCEPTION_HANDLER = '\Functions\exception_handler';
-const ERROR_HANDLER     = '\Functions\error_handler';
-const AUTOLOADER        = 'spl_autoload';
-const AUTOLOAD_EXTS     = [
-	'.php',
-];
-const INCLUDE_PATH      = [
-	__DIR__,
-];
-
-const CSP_ALLOWED_HEADERS = [
-	'Accept',
-	'Content-Type',
-	'Upgrade-Insecure-Requests',
-];
-
-const TOKEN_EXPIRES = [
-	'value' => 1,
-	'units' => 'month',
-];
 
 define(__NAMESPACE__ . '\HOST', sprintf('%s://%s',
 	(array_key_exists('HTTPS', $_SERVER) and ! empty($_SERVER['HTTPS'])) ? 'https' : 'http',
