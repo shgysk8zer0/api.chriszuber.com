@@ -1,3 +1,9 @@
 [submodule "shgysk8zer0/phpapi"]
 	path = shgysk8zer0/phpapi
 	url = https://github.com/shgysk8zer0/phpapi.git
+[submodule "shgysk8zer0/phpgeo"]
+	path = shgysk8zer0/phpgeo
+	url = https://github.com/shgysk8zer0/phpgeo.git
+[submodule "shgysk8zer0/phpcrypt"]
+	path = shgysk8zer0/phpcrypt
+	url = https://github.com/shgysk8zer0/phpcrypt.git
