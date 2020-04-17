@@ -1,7 +1,8 @@
 <?php
 namespace Consts;
 
-const DEBUG             = true;
+define(__NAMESPACE__ . '\ENV', getenv('ENVIRONMENT') ?? 'UNKNOWN');
+const DEBUG             = ENV === 'DEVELOPMENT';
 const BASE              = __DIR__ . DIRECTORY_SEPARATOR;
 const DATA_DIR          = BASE . 'data' . DIRECTORY_SEPARATOR;
 const LOGS_DIR          = BASE . 'logs' . DIRECTORY_SEPARATOR;

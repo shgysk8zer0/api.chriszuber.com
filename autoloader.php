@@ -5,22 +5,24 @@ use \RuntimeException;
 use \Exception;
 use \Throwable;
 
-chdir(__DIR__);
-
-if (! file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'config.ini')) {
-	throw new Exception('Missing config file');
-}
-
-define(
-	__NAMESPACE__ . '\CONFIG',
-	parse_ini_file(__DIR__ . DIRECTORY_SEPARATOR . 'config.ini', true, INI_SCANNER_TYPED)
-);
+const CONFIG_FILE = __DIR__ . DIRECTORY_SEPARATOR . 'config.ini';
 
 try {
+	chdir(__DIR__);
+
+	if (! file_exists(CONFIG_FILE)) {
+		throw new RuntimeException('Missing config file');
+	}
+
+	define(
+		__NAMESPACE__ . '\CONFIG',
+		parse_ini_file(CONFIG_FILE, true, INI_SCANNER_TYPED)
+	);
+
 	if (! is_array(CONFIG) or count(CONFIG) === 0) {
-		throw new Exception('Config file not found or could not be parsed');
+		throw new RuntimeException('Config file not found or could not be parsed');
 	} elseif (version_compare(PHP_VERSION, CONFIG['php']['min_version'], '<')) {
-		throw new Exception(sprintf('PHP version %s or higher required', CONFIG['php']['min_version']));
+		throw new RuntimeException(sprintf('PHP version %s or higher required', CONFIG['php']['min_version']));
 	} elseif (is_array(CONFIG['php']['extensions'])) {
 		foreach (CONFIG['php']['extensions'] as $ext) {
 			if (! extension_loaded($ext)) {
@@ -72,11 +74,12 @@ try {
 
 	\shgysk8zer0\PHPAPI\API::allowHeaders(...CONFIG['cors']['allowed_headers']);
 
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	http_response_code(500);
 	header('Content-Type: application/json');
 
 	exit(json_encode(['error' => [
+		'type'    => get_class($e),
 		'message' => $e->getMessage(),
 		'code'    => 500,
 	]]));

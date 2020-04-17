@@ -1,0 +1,14 @@
+[default]
+name=Default
+runtime=host
+toolchain=default
+config-opts=
+run-opts=
+prefix=/home/shgysk8zer0/.var/app/org.gnome.Builder/cache/gnome-builder/install/api.chriszuber.com/host
+app-id=
+postbuild=
+prebuild=
+default=true
+
+[default.environment]
+ENVIRONMENT=DEVELOPMENT
