@@ -32,7 +32,7 @@ try {
 		unset($ext);
 	}
 
-	if (is_array(CONFIG['env'])) {
+	if (@is_array(CONFIG['env'])) {
 		foreach (CONFIG['env'] as $key => $val) {
 			putenv(sprintf('%s=%s', $key, $val));
 		}
