@@ -19,16 +19,16 @@ $api->on('GET', function(API $req): void
 	echo json_encode($req);
 });
 
-$api->on('POST', function(API $request): void
+$api->on('POST', function(API $req): void
 {
 	Headers::contentType('application/json');
-	echo json_encode($request);
+	echo json_encode($req);
 });
 
-$api->on('DELETE', function(API $request): void
+$api->on('DELETE', function(API $req): void
 {
 	Headers::contentType('application/json');
-	echo json_encode($request);
+	echo json_encode($req);
 });
 
 $api();
