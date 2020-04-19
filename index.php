@@ -17,6 +17,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" href="https://kernvalley.us/favicon.ico" />
 		<link rel="stylesheet" href="https://cdn.kernvalley.us/css/core-css/rem.css" media="all" />
 		<link rel="stylesheet" href="https://cdn.kernvalley.us/css/core-css/element.css" media="all" />
 		<link rel="stylesheet" href="https://cdn.kernvalley.us/css/core-css/class-rules.css" media="all" />
