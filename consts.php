@@ -4,6 +4,7 @@ namespace Consts;
 define(__NAMESPACE__ . '\ENV', getenv('ENVIRONMENT') ?? 'UNKNOWN');
 const DEBUG             = ENV === 'DEVELOPMENT';
 const BASE              = __DIR__ . DIRECTORY_SEPARATOR;
+const README            = BASE . 'README.md';
 const DATA_DIR          = BASE . 'data' . DIRECTORY_SEPARATOR;
 const LOGS_DIR          = BASE . 'logs' . DIRECTORY_SEPARATOR;
 const UPLOADS_DIR       = BASE . 'uploads' . DIRECTORY_SEPARATOR;

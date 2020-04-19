@@ -2,7 +2,16 @@
 
 namespace Functions;
 use const \Consts\{DEBUG, ERROR_LOG, UPLOADS_DIR, BASE};
-use \shgysk8zer0\PHPAPI\{PDO, User, JSONFILE, Headers, HTTPException, Request, URL};
+use \shgysk8zer0\PHPAPI\{
+	PDO,
+	Console,
+	User,
+	JSONFILE,
+	Headers,
+	HTTPException,
+	Request,
+	URL,
+};
 use \StdClass;
 use \DateTime;
 use \Throwable;
@@ -79,6 +88,9 @@ function log_exception(Throwable $e): bool
 	// 	'line'    => $e->getLine(),
 	// 	'trace'   => $e->getTrace(),
 	// ]]));
+	if (DEBUG && ! headers_sent()) {
+		Console::error($e);
+	}
 	return error_log(
 		sprintf(
 			'[%s %d] "%s" on %s:%d at %s' . PHP_EOL,
