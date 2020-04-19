@@ -1,0 +1,20 @@
+{
+    "name": "shgysk8zer0/api.kernvalley.us",
+    "description": "API for KernValley.US",
+    "type": "project",
+    "require": {
+        "erusev/parsedown": "^1.7",
+        "phpmailer/phpmailer": "^6.1",
+        "cboden/ratchet": "^0.4.2",
+        "minishlink/web-push": "^5.2",
+        "stripe/stripe-php": "^7.28"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Zuber",
+            "email": "admin@kernvalley.us"
+        }
+    ],
+    "minimum-stability": "stable"
+}

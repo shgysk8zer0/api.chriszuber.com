@@ -5,3 +5,5 @@
 *.bak
 uploads/
 !uploads/index.php
+
+/vendor/
