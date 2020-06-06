@@ -10,3 +10,6 @@
 [submodule "shgysk8zer0/phpschema"]
 	path = shgysk8zer0/phpschema
 	url = https://github.com/shgysk8zer0/phpschema.git
+[submodule "shgysk8zer0/geoip"]
+	path = shgysk8zer0/geoip
+	url = https://github.com/shgysk8zer0/geoip.git
