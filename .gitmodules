@@ -13,3 +13,6 @@
 [submodule "shgysk8zer0/geoip"]
 	path = shgysk8zer0/geoip
 	url = https://github.com/shgysk8zer0/geoip.git
+[submodule "shgysk8zer0/http"]
+	path = shgysk8zer0/http
+	url = https://github.com/shgysk8zer0/http.git
