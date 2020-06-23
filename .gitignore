@@ -6,3 +6,6 @@
 *.bak
 uploads/
 !uploads/index.php
+.cache/*
+!.cache/.htaccess
+!.cache/.gitkeep
