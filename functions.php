@@ -2,22 +2,30 @@
 
 namespace Functions;
 use const \Consts\{DEBUG, ERROR_LOG, UPLOADS_DIR, BASE};
-use \shgysk8zer0\PHPAPI\{PDO, User, JSONFILE, Headers, HTTPException, Request, URL};
+use \shgysk8zer0\PHPAPI\{PDO, User, JSONFILE, Headers, HTTPException};
+use \shgysk8zer0\HTTP\{Request, URL};
+use \shgysk8zer0\HTTP\Interfaces\{ResponseInterface};
 use \StdClass;
 use \DateTime;
 use \Throwable;
 use \ErrorException;
+
+function fetch(...$args):? ResponseInterface
+{
+	$req = new Request(...$args);
+
+	return $req->send();
+}
 
 function is_pwned(string $pwd): bool
 {
 	$hash   = strtoupper(sha1($pwd));
 	$prefix = substr($hash, 0, 5);
 	$rest   = substr($hash, 5);
-	$req    = new Request("https://api.pwnedpasswords.com/range/{$prefix}");
-	$resp   = $req->send();
+	$resp   = fetch("https://api.pwnedpasswords.com/range/{$prefix}");
 
 	if ($resp->ok) {
-		return strpos($resp->body, "{$rest}:") !== false;
+		return strpos($resp->text(), "{$rest}:") !== false;
 	} else {
 		return false;
 	}
