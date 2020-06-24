@@ -6,7 +6,7 @@ use \shgysk8zer0\HTTP\{Request, Response, Body, Headers, URL, ContentSecurityPol
 
 use \shgysk8zer0\HTTP\Abstracts\{HTTPStatusCodes as HTTP};
 
-use \shgysk8zer0\PHPAPI\{SAPILogger, ConsoleLogger, FileCache, LoggerSubject, Template};
+use \shgysk8zer0\PHPAPI\{SAPILogger, ConsoleLogger, FileCache, LoggerSubject, UUID};
 
 use \Throwable;
 
@@ -121,7 +121,11 @@ try {
 
 		$resp = new Response(new Body(json_encode($entries)), [
 			'headers' => new Headers([
-				'Content-Type' => 'application/json',
+				'Content-Type'                 => 'application/json',
+				'Access-Control-Allow-Origin'  => '*',
+				'Access-Control-Allow-Methods' => 'OPTIONS, GET',
+				'Access-Control-Allow-Headers' => 'Accept, Content-Type, Upgrade-Insecure-Requests',
+				'X-REQUEST-UUID'               => new UUID(),
 			]),
 			'status'  => HTTP::OK,
 		]);
