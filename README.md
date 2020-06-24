@@ -1,4 +1,4 @@
-# api.chriszuber.com 
+# api.chriszuber.com
 [![PHP Lint](https://github.com/shgysk8zer0/api.chriszuber.com/workflows/PHP%20Lint/badge.svg)](https://github.com/shgysk8zer0/api.chriszuber.com/actions?query=workflow%3A%22PHP+Lint%22)
 [![Super Linter](https://github.com/shgysk8zer0/api.chriszuber.com/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/shgysk8zer0/api.chriszuber.com/actions?query=workflow%3A%22Lint+Code+Base%22)
 
