@@ -1,7 +1,7 @@
 #! /bin/bash
 # Global variables
 extensions=('php' 'phtml')
-ignore_dirs=("$(realpath './.github')")
+ignore_dirs=("$(realpath './vendor')")
 
 function lint_file() {
 	local filename="$1"
@@ -21,17 +21,21 @@ function array_contains () {
 }
 
 function lint_dir() {
-        local passed
+	local passed
 	passed="$(realpath "$1")"
 
-	if [[ -d "$passed" && ! $(array_contains "$passed" "${ignore_dirs[@]}") ]]; then
-		for path in "$passed"/*; do
-			if [ -f "$path" ]; then
-				lint_file "$path" || exit 1;
-			elif [ -d "$path" ]; then
-				lint_dir "$path" || exit 1;
-			fi
-		done
+	if [[ -d "$passed" ]]; then
+		if array_contains "$passed" "${ignore_dirs[@]}"; then
+			echo "$passed is ignored"
+		else
+			for path in "$passed"/*; do
+				if [ -f "$path" ]; then
+					lint_file "$path" || exit 1;
+				elif [ -d "$path" ]; then
+					lint_dir "$path" || exit 1;
+				fi
+			done
+		fi
 	fi
 }
 
