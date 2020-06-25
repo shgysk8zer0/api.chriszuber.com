@@ -1,14 +1,13 @@
 #! /bin/bash
 # Global variables
-# @TODO handle multiple extensions
 extensions=('php' 'phtml')
-ignore_dirs=($(realpath './.github/'))
+ignore_dirs=("$(realpath './.github')")
 
 function lint_file() {
 	local filename="$1"
 	local extension="${filename##*.}"
 
-	if array_contains "$extension" $extensions; then
+	if array_contains "$extension" "${extensions[@]}"; then
 		php -l "$filename"
 	fi
 }
@@ -22,9 +21,10 @@ function array_contains () {
 }
 
 function lint_dir() {
-	local passed=$(realpath "$1")
+        local passed
+	passed="$(realpath "$1")"
 
-	if [[ -d "$passed" && ! $(array_contains "$passed" $ignore_dirs) ]]; then
+	if [[ -d "$passed" && ! $(array_contains "$passed" "${ignore_dirs[@]}") ]]; then
 		for path in "$passed"/*; do
 			if [ -f "$path" ]; then
 				lint_file "$path" || exit 1;
@@ -36,12 +36,12 @@ function lint_dir() {
 }
 
 if [ $# -eq 0 ]; then
-	lint_dir $(realpath './')
+	lint_dir "$(realpath './')"
 else
-	for path in $@; do
+	for path in "$@"; do
 		if [ -f "$path" ]; then
 			lint_file "$path"
-		elif [-d "$path" ]; then
+		elif [ -d "$path" ]; then
 			lint_dir "$path"
 		fi
 	done
