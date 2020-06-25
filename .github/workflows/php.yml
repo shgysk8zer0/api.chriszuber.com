@@ -21,4 +21,4 @@ jobs:
       run: |
         pwd
         git submodule update --init --recursive
-        php ./lint.php
+        bash './php-lint.sh'
