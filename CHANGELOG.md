@@ -5,12 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- markdownlint-disable -->
-## [v1.0.1] 2020-06-23
+## [v1.0.2] - 2020-06-29
+
+### Added
+- Git submodule watching via Dependabot
+
+## [v1.0.1] - 2020-06-23
 
 ### Fixed
 - Add missing CORS headers (#53)
 
-## [v1.0.0] 2020-06-23
+## Updated
+
+## [v1.0.0] - 2020-06-23
 
 ### Added
 - Update PHPAPI
