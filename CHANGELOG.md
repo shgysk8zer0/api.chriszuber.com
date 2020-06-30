@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Add missing CORS headers (#53)
 
+## Updated
+
 ## [v1.0.0] - 2020-06-23
 
 ### Added
